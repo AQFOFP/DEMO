@@ -12,7 +12,7 @@ from elasticsearch import Elasticsearch
 
 # 无密码，自己搭建的
 es = Elasticsearch(
-    ["127.0.0.1:9200"], # 连接集群，以列表的形式存放各节点的IP地址
+    ["127.0.0.1:9200"],  # 连接集群，以列表的形式存放各节点的IP地址
 )
 
 
