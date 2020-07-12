@@ -48,60 +48,56 @@ def mongoorm():
     class Users(Document):
         name = StringField(required=True, max_length=200)
         age = IntField(required=True)
+        type = IntField(required=True)
+
+    class LuckyJulyDevote(Document):
+        ruid = StringField(default='')
+        point = IntField(default=0)
+        giftcount = IntField(default=0)
+        round_number = IntField(default=0)
+        type = IntField(default=0)  # 0:代表sender 1:代表revicer 2:代表room
+
+    per_list = ['sen_data', 'rece_data', 'room_data']
+    data = {}
+    data_list = []
+    for rs in range(1, 5):
+        for no, item in enumerate(per_list):
+            tempdict = {}
+            uid = 'r:'+'11111' if no == 2 else '11111'
+
+            lkobj = LuckyJulyDevote.objects(ruid=uid, round_number=rs, type=no).first()
+            if no == 2:
+                print(lkobj)
+            tempdict['count'] = lkobj.giftcount if lkobj else 0
+            tempdict['point'] = lkobj.point if lkobj else 0
+            data[item] = tempdict
+        data['rounds'] = rs
+        data_list.append(data.copy())
+
+    print(data_list)
+
+
 
     # user = Users()
     # user.name = 'zhangsan'
     # user.age = 18
-    #
+    # #
     # user.save()
-    users = Users.objects(name='zhangsan').all()  # 返回所有的文档对象列表
+    # users = Users.objects(name='zhangsan').all()  # 返回所有的文档对象列表
+    #
+    # print(users, type(users))
+    # print(len(users))
+    #
+    # for rn, alr in enumerate(users):
+    #     print(rn, type(rn))  # 0 <class 'int'>
+    #     print(alr, type(alr))  # Users object <class '__main__.mongoorm.<locals>.Users'>
+    #
+    # for u in users:
+    #     print("id", u.id, "name:", u.name, ",age:", u.age, type(u.age))  # name: zhangsan ,age: 18
 
-    print(users, type(users))
-    print(len(users))
-
-    for rn, alr in enumerate(users):
-        print(rn, type(rn))  # 0 <class 'int'>
-        print(alr, type(alr))  # Users object <class '__main__.mongoorm.<locals>.Users'>
-
-    for u in users:
-        print("id", u.id, "name:", u.name, ",age:", u.age, type(u.age))  # name: zhangsan ,age: 18
-
-    data = dict()
-    creditcount = dict()
-    creditdiamond = dict()
-    data_list = []
-    Total = Paid1 = Paid2 = Unpaid1 = Unpaid2 = 0
-    for credit in users:
-        temp = dict()
-        temp['id'] = str(credit.id)
-        temp['name'] = credit.name
-        temp['age'] = credit.age
-        data_list.append(temp.copy())
-
-        if credit.age == 18:
-            Paid1 += 1
-            Paid2 += credit.age
-
-        if credit.age == 1 or credit.age == 0:
-            Unpaid1 += 1
-            Unpaid2 += credit.age
-
-        Total += credit.age
-
-    data["data_list"] = data_list
-
-    creditcount['Times'] = len(users)
-    creditcount['Paid'] = Paid1
-    creditcount['Unpaid'] = Unpaid1
-    creditcount['Credibility1'] = str(round(Paid1 / len(users) * 100, 2)) + '%' if len(users) else '0%'
-    data["creditcount"] = creditcount
-
-    creditdiamond['Total'] = Total
-    creditdiamond['Unpaid'] = Unpaid2
-    creditdiamond['Credibility2'] = str(round(Paid2 / Total * 100, 2)) + '%' if Total else '0%'
-    data["creditdiamond"] = creditdiamond
-
-    print(data)
+    # user = Users.objects(name='zhangsan').first()
+    # print(user.id.generation_time.replace(tzinfo=None))
+    # print(str(user.id))
 
 
 
@@ -138,5 +134,4 @@ def savexl():
 
 if __name__ == '__main__':
     # savexl()
-    # mongoorm()
-    print(all([1, 1, ""]))
+    mongoorm()

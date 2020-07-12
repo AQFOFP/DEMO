@@ -21,9 +21,11 @@ def insert():
     　　create：必须指定待查询的idnex、type、id和查询体body；缺一不可，否则报错 
 　　    index：相比于create，index的用法就相对灵活很多；id并非是一个必选项，如果指定，则该文档的id就是指定值，
               若不指定，则系统会自动生成一个全局唯一的id赋给该文档。 
+              若id存在，则为更新记录，否则为创建记录
     '''
-    body = {"name": 'lucy', 'sex': 'female', 'age': 10}
-    es.index(index='indexname', doc_type='typeName', body=body)
+    body = {"name": 'lucy', 'sex': 'female', 'age': 11}
+    rt = es.index(index='school', doc_type='students', id=1, body=body)
+    print(rt)  # 成功返回字典(包含index、tyoe等信息)
 
     # # 插入数据,index，doc_type名称可以自定义，id可以根据需求赋值,body为内容
     # es.index(index="my_index", doc_type="test_type", id=0, body={"name": "python", "addr": "深圳"})
@@ -33,16 +35,15 @@ def insert():
     # es.create(index="my_index", doc_type="test_type", id=2, body={"name": "python", "addr": "深圳"})
 
 def query():
-    # get：获取指定index、type、id所对应的文档
-    es.get(index='indexname', doc_type='typeName')
+    # get：指定index、type、id,查询所对应的文档
+    rt = es.get(index='school', doc_type='students', id=1)
+    print(rt, type(rt))
 
 
 def delete():
     # delete：删除指定index、type、id的文档
-    es.delete(index='indexname', doc_type='typeName', id='idValue')
-
-
-
+    rt = es.delete(index='school', doc_type='students',  id=1)
+    print(rt, type(rt))
 
 
 def update():
@@ -50,7 +51,7 @@ def update():
     es.update(index='indexname', doc_type='typeName', id='idValue', body={待更新字段})
 
 
-def bulkquery():
+def query_condition():
     # 条件查询
     query = {'query': {'match_all': {}}}  # 查找所有文档
     # query = {'query': {'term': {'name': 'jack'}}}  # 查找名字叫做jack的所有文档
@@ -59,8 +60,7 @@ def bulkquery():
     print(allDoc)
 
 
-
-def bulkdelete():
+def delete_condition():
     # 条件删除
     query = {'query': {'match': {'sex': 'famale'}}}  # 删除性别为女性的所有文档
     query = {'query': {'range': {'age': {'lt': 11}}}}  # 删除年龄小于11的所有文档
@@ -68,6 +68,6 @@ def bulkdelete():
 
 
 if __name__ == '__main__':
-    bulkquery()
+    delete()
     # https://blog.csdn.net/xuezhangjun0121/article/details/80745575
 
