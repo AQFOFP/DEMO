@@ -1,3 +1,5 @@
+import json
+
 from rediscluster import RedisCluster
 
 # from qh_public.redis_tools import fun_cache_rds
@@ -35,6 +37,7 @@ cache_startup_nodes = [
 # redis_conn = fun_cache_rds if is_debug else RedisCluster(startup_nodes=startup_nodes, password="kdib2nd$&H#")
 
 cache_redis_conn = RedisCluster(startup_nodes=cache_startup_nodes, password="123456")
-cache_redis_conn.set('name', '666')
-print(cache_redis_conn.get('name'))
+res = cache_redis_conn.set(name='age', value='666', nx=True)  # nx 表示当name不存在时才设置key=value
+print(res)
+print(json.loads(cache_redis_conn.get('name')))
 print('22222')

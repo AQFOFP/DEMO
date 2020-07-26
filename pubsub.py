@@ -1,3 +1,4 @@
+import datetime
 import pickle
 import time
 
@@ -49,47 +50,28 @@ def mongoorm():
         name = StringField(required=True, max_length=200)
         age = IntField(required=True)
         type = IntField(required=True)
+        hoppy = ListField(default=[])
+        time_sp = IntField(default=0)
 
-    class LuckyJulyDevote(Document):
-        ruid = StringField(default='')
-        point = IntField(default=0)
-        giftcount = IntField(default=0)
-        round_number = IntField(default=0)
-        type = IntField(default=0)  # 0:代表sender 1:代表revicer 2:代表room
-
-    per_list = ['sen_data', 'rece_data', 'room_data']
-    data = {}
-    data_list = []
-    for rs in range(1, 5):
-        for no, item in enumerate(per_list):
-            tempdict = {}
-            uid = 'r:'+'11111' if no == 2 else '11111'
-
-            lkobj = LuckyJulyDevote.objects(ruid=uid, round_number=rs, type=no).first()
-            if no == 2:
-                print(lkobj)
-            tempdict['count'] = lkobj.giftcount if lkobj else 0
-            tempdict['point'] = lkobj.point if lkobj else 0
-            data[item] = tempdict
-        data['rounds'] = rs
-        data_list.append(data.copy())
-
-    print(data_list)
-
-
-
-    # user = Users()
-    # user.name = 'zhangsan'
+    user = Users(name = 'ddad', age = 18,type = 65, hoppy = ['eere', 'erw',], time_sp = 1577808001956).save()
+    # user.name = 'l6'
     # user.age = 18
-    # #
+    # user.type = 666
+    # user.hoppy = ['lanqi', 'youyong',]
+    # user.time_sp = 1577808001956
     # user.save()
-    # users = Users.objects(name='zhangsan').all()  # 返回所有的文档对象列表
+
+
+    # users = Users.objects(hoppy__in=['youyong', 'running', 'll'], time_sp__gte=1577808001956).all()  # 返回所有的文档对象列表
     #
-    # print(users, type(users))
+    print(user.name, type(user))
     # print(len(users))
     #
     # for rn, alr in enumerate(users):
-    #     print(rn, type(rn))  # 0 <class 'int'>
+    #     # print(rn, type(rn))  # 0 <class 'int'>
+    #     print(alr.hoppy, type(alr.hoppy))  # 0 <class 'int'>
+    #     if 'youyong' in alr.hoppy:
+    #         print('6666')
     #     print(alr, type(alr))  # Users object <class '__main__.mongoorm.<locals>.Users'>
     #
     # for u in users:
@@ -135,3 +117,19 @@ def savexl():
 if __name__ == '__main__':
     # savexl()
     mongoorm()
+    # dd = '2018-1-7'
+    # doj = datetime.datetime.strptime(dd, '%Y-%m-%d')
+    #
+    # n = (u'摩羯座', u'水瓶座', u'双鱼座', u'白羊座', u'金牛座', u'双子座', u'巨蟹座', u'狮子座', u'处女座', u'天秤座', u'天蝎座', u'射手座')
+    # d = ((1, 21), (2, 19), (3, 20), (4, 20), (5, 20), (6, 20), (7, 22), (8, 22), (9, 22), (10, 22), (11, 22), (12, 22))
+    # print(n[len(list(filter(lambda y: y <= (doj.month, doj.day), d))) % 12])
+
+
+
+    # dd_str = '2020-07-31 23:59:59'
+    # ww = time.strptime(dd_str, "%Y-%m-%d %X")
+    # atime = (time.mktime(ww) + 5*60*60)*1000
+    # print(int(atime))
+
+    print(int(time.time()))
+
