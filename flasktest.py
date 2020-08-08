@@ -1,5 +1,7 @@
+import time
 
 from flask import Flask, request, jsonify
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
@@ -25,6 +27,23 @@ def admin_login(*args, **kwargs):
 
     # 返回json
     return jsonify(params)
+
+@app.route('/upload',methods=['GET','POST'])
+def upload():
+    if request.method == 'POST':
+        f = request.files.get('thumb')
+        filename = "op_sys_{}_".format(int(time.time()))+secure_filename(f.filename)
+        f.save(filename)
+        test_file()
+        return 'ok'
+
+
+def test_file():
+    print('666666')
+    f = request.files.get('thumb')
+    if f:
+        filename = '666' + secure_filename(f.filename)
+        f.save(filename)
 
 
 if __name__ == '__main__':

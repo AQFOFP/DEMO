@@ -27,17 +27,20 @@ cache_startup_nodes = [
     {"host": "149.129.109.88", "port": "6392"},
 ]
 
-cache_startup_nodes = [
-    {"host": "149.129.109.88", "port": "6380"},
-    {"host": "149.129.109.88", "port": "6381"},
-    {"host": "149.129.109.88", "port": "6382"},
-]
+# cache_startup_nodes = [
+#     {"host": "149.129.109.88", "port": "6380"},
+#     {"host": "149.129.109.88", "port": "6381"},
+#     {"host": "149.129.109.88", "port": "6382"},
+# ]
 
 
 # redis_conn = fun_cache_rds if is_debug else RedisCluster(startup_nodes=startup_nodes, password="kdib2nd$&H#")
+if __name__ == '__main__':
 
-cache_redis_conn = RedisCluster(startup_nodes=cache_startup_nodes, password="123456")
-res = cache_redis_conn.set(name='age', value='666', nx=True)  # nx 表示当name不存在时才设置key=value
-print(res)
-print(json.loads(cache_redis_conn.get('name')))
-print('22222')
+    cache_redis_conn = RedisCluster(startup_nodes=cache_startup_nodes, password="123456")
+    res = cache_redis_conn.set(name='name', value='666', nx=True)  # nx 表示当name不存在时才设置key=value
+    print(res)
+    print(json.loads(cache_redis_conn.get('name')))
+    print('--------------')
+
+    cache_redis_conn.publish('message:flood', '{data:zhangsan}')
