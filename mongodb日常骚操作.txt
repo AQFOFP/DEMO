@@ -1,0 +1,106 @@
+
+1.查询文档中字段与字段值相等或不相等
+db.badge_list.find({$where:"this.badge_id!=this.p_badge_id", badge_type:1, sub_badge_order:1 })
+
+
+2.查询文档中字段不等于某个值
+db.badge_list.find({badge_type:2, p_badge_id:{$ne:0}})
+
+3.查询存在或不存在某个字段的文档
+db.badge_list.find({badge_type:2, p_badge_id: {$exists: true})
+
+
+4.查询文档时指定字段
+db.badge_list.find({},{_id:0, name:1})
+
+
+5.去掉重复列
+db.userInfo.distinct("name");
+
+
+6.去重之后求记录数
+db.consumerecords.distinct("userId").length
+
+
+7.删除某一个集合中的字段
+db.yourcollection.update({},{$unset:{'需要删除的字段',''}},false, true)
+
+8.或操作
+db.userInfo.find({$or: [{age: 22}, {age: 25}]});
+
+9.设置终端显示行数
+DBQuery.shellBatchSize = 50
+
+
+
+
+聚合操作：
+SQL 操作/函数   	mongodb聚合操作
+where				$match
+group by			$group
+having				$match
+select				$project
+order by			$sort
+limit　				$limit
+sum()				$sum
+count()				$sum
+join				$lookup
+
+
+pipline = [
+{$group:}
+]
+
+
+pipline = [
+	{'$group': {'_id': '$uid', 'sending': {'$sum': '$sending'}}},
+	{'$sort': {'sending': -1}},
+	{'$limit': n},
+]
+
+send_top_list = ConstellDevote._get_collection().aggregate(pipline)
+
+
+
+
+
+
+db.badge_list.aggregate([
+{$match:{"badge_type":2, "p_badge_id": {$exists: true}}},
+{$match:{"p_badge_id": {$ne:0}}},
+])
+$match:{p_badge_id:{$ne:0}}
+
+YourModel.aggregate(
+    [{
+        $match: {
+            "type": ObjectId("50ed90f5a70defef23000002"),
+            "config.name": "alpha"
+        }
+    }, {
+        $lookup: {
+            from: "users",
+            localField: "user",
+            foreignField: "_id",
+            as: "users"
+        }
+    }, {
+        $unwind: "$users"
+    }],
+    function(err, result) {
+        console.log("lastname : " + result.users.lastname);
+    });
+	
+	
+	
+db.getCollection('beauty_devote').aggregate({$group :{ _id : null, total: { $sum : "$sending" } } });	
+
+
+
+
+
+
+
+
+
+

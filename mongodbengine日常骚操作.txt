@@ -1,0 +1,7 @@
+
+
+1. 或查询
+User.objects((Q(country='uk') & Q(age__gte=18)) | Q(age__gte=20))
+
+2.判断某个字段是否存在
+MicFrameSource.objects(Q(**filters, name__contains=search, is_activity=0) | Q(**filters, name__contains=search, is_activity__exists=False)).order_by("forder")[start:start + page_size]
