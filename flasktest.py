@@ -1,3 +1,4 @@
+import json
 import time
 
 from flask import Flask, request, jsonify
@@ -17,12 +18,17 @@ def admin_login(*args, **kwargs):
     # )
 
     # 获取POST方式传递过来的参数
-    print(request.stream.read().decode().strip())
-    print(request.stream.read().decode().strip())
+    # print(type(request.stream.read().decode().strip()))
+    # print(request.form)  # 获取表单格式数据
+    print(json.loads(request.get_data()))   # 获取前端json格式数据
+    # print(type(json.loads(request.get_data())))
+    rank_list = json.loads(request.get_data()).get('rank')
+    for item in rank_list:
+        print(item, type(item))
 
     params = {
         "name": 'zhangsan',
-        'age': 33
+        'age': 336
     }
 
     # 返回json
@@ -47,4 +53,5 @@ def test_file():
 
 
 if __name__ == '__main__':
-    app.run(host="127.0.0.1", threaded=True)
+    app.run(host="127.0.0.1", threaded=True, debug=True)
+    # print(__name__)

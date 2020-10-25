@@ -53,12 +53,16 @@ pipline = [
 
 
 pipline = [
-	{'$group': {'_id': '$uid', 'sending': {'$sum': '$sending'}}},
-	{'$sort': {'sending': -1}},
-	{'$limit': n},
+	{$project:{link:{$substr:['$icon_back', 0, 35]}}
+	{'$group': {'_id': '$link'}},
 ]
 
 send_top_list = ConstellDevote._get_collection().aggregate(pipline)
+
+db.badge_list.aggregate([
+	{$project:{link:{$substr:['$icon_back', 0, 35]}}},
+	{'$group': {'_id': '$link'}},
+])
 
 
 

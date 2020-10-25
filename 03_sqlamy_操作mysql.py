@@ -92,6 +92,10 @@ if __name__ == '__main__':
     # # 初始化数据
     # init_data()
 
-    user_obj = session.query(Users).filter_by(name='Shark').scalar()
-    print(user_obj.group.name)
+    user_objs = session.query(Users).filter(Users.name.like('%P%')).all()
+    # print(user_objs)
+    for item in user_objs:
+        item.name = item.name.replace('P', 'HTTP')
+        session.add(item)
+    session.commit()
 

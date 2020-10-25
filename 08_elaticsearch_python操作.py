@@ -1,3 +1,6 @@
+import threading
+import time
+
 from elasticsearch import Elasticsearch
 
 # 默认host为localhost,port为9200.但也可以指定host与port
@@ -67,7 +70,46 @@ def delete_condition():
     es.delete_by_query(index='indexname', body=query, doc_type='typeName')
 
 
+
+def es_crud():
+    # for i in range(n, n+1000):
+    #     body = {"name": 'lucy'+str(i), 'sex': 'female', 'age': 11+i}
+    #     print(es.index(index='school', doc_type='students', body=body))
+
+    query = {'query': {'match_all': {}}}
+    while True:
+        result_es_count = es.count(index="school", doc_type="students", body=query, ignore=404)
+        print(f'总记录数：{result_es_count["count"]}')
+        # # if result_es_count['count'] == 0:
+        # #     break
+        #
+        try:
+            params = {'size': 10,
+                      'refresh':'true'
+                      }
+            print(es.delete_by_query(index='school', doc_type='students', body=query, params=params))  # 通过查询删除数据
+            # time.sleep(1)
+        except Exception as e:
+            print(e)
+
+
+
 if __name__ == '__main__':
-    delete()
+    es_crud()
+    # t1 = threading.Thread(target=es_crud, args=(1,))
+    # t2 = threading.Thread(target=es_crud, args=(1001,))
+    # t3 = threading.Thread(target=es_crud, args=(2001,))
+    # t4 = threading.Thread(target=es_crud, args=(3001,))
+    # t1.start()
+    # t2.start()
+    # t3.start()
+    # t4.start()
+    #
+    # t1.join()
+    # t2.join()
+    # t3.join()
+    # t4.join()
+
+
     # https://blog.csdn.net/xuezhangjun0121/article/details/80745575
 
