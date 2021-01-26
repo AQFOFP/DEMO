@@ -85,7 +85,7 @@ def es_crud():
         #
         try:
             params = {'size': 10,
-                      'refresh':'true'
+                      'refresh': 'true'
                       }
             print(es.delete_by_query(index='school', doc_type='students', body=query, params=params))  # 通过查询删除数据
             # time.sleep(1)
@@ -93,22 +93,92 @@ def es_crud():
             print(e)
 
 
+def create_es_data():
+    body = {
+        'uid': 'abc3',
+        'changed': -544,
+        'balance': 453,
+        'title': 'googlePayCharge',
+        'desc': 'buy product_coins_diamonds3',
+        'atype': 5,
+        'mtime': 1587933046
+    }
+    es.index(index='youstar', doc_type='diamond', body=body)
+
 
 if __name__ == '__main__':
-    es_crud()
-    # t1 = threading.Thread(target=es_crud, args=(1,))
-    # t2 = threading.Thread(target=es_crud, args=(1001,))
-    # t3 = threading.Thread(target=es_crud, args=(2001,))
-    # t4 = threading.Thread(target=es_crud, args=(3001,))
-    # t1.start()
-    # t2.start()
-    # t3.start()
-    # t4.start()
+    # create_es_data()
+    # body_search = {
+    #     "size": 0,
+    #     'query': {
+    #         'bool': {
+    #             # 'filter': {},
+    #             # 'filter': {'term': {'atype': 1}},
+    #             'filter': [{"range": {"mtime": {"gte": 1587933011, "lte": 1587933055}}},
+    #                        {"range": {'changed': {"lt": 0}}},
+    #                        ],
+    #         }
+    #     },
+    #     "aggs": {
+    #             'record_count_ll': {
+    #                 "terms": {
+    #                     "field": "uid.keyword",
+    #                 },
+    #                 'aggs': {
+    #                     'sub_beans': {
+    #                         'sum': {'field': 'changed'}
+    #                     },
+    #                     # "having": {
+    #                     #     "bucket_selector": {
+    #                     #         "buckets_path": {
+    #                     #             "orderCount": "_count",
+    #                     #         },
+    #                     #         "script": "params.orderCount ==1"
+    #                     #     }
+    #                     # }
+    #                 }
+    #             }
+    #         },
+    # }
     #
-    # t1.join()
-    # t2.join()
-    # t3.join()
-    # t4.join()
+    # sub_beans = {
+    #     "size": 0,
+    #     'query': {
+    #         'bool': {
+    #             'filter': [{"range": {"mtime": {"gte": 1587933011, "lte": 1587933055}}},
+    #                        {"range": {'changed': {"lt": 0}}},
+    #                        ],
+    #         }
+    #     },
+    #     "aggs": {
+    #      "record_count_ll": {
+    #        "sum": {
+    #          "field": "changed"
+    #        }
+    #      }
+    #     }
+    # }
+    user_list = ['abc3']
+    body_search = {"from": 0, "size": 10000,
+                   "query": {
+                       "bool": {"filter": [{"range": {"mtime": {"gte": 1587933011, "lte": 1587933055}}},
+                                           {"terms": {"atype": ["1"]}},
+                                           {"terms": {"title": ["ApplePayCharge"]}}
+                                           ]}},
+                   # "sort": [{"mtime": {"order": "DESC"}}],
+                   }
+
+    # result_es = es_bak.search(index="money_detail2_es", doc_type="politics", body=body_search, ignore=404)
+    #
+    # ret = result_es['hits']['hits']
+
+    result_es = es.search(index="youstar", doc_type="diamond", body=body_search, ignore=404)
+    online_res = result_es['hits']['hits']
+    # online_res = result_es['aggregations']['record_count_ll']['value']
+    # online_res = result_es['aggregations']['record_count_ll']['buckets']
+    # print(online_res)
+    for item in online_res:
+        print(item)
 
 
     # https://blog.csdn.net/xuezhangjun0121/article/details/80745575

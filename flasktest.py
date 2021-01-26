@@ -2,9 +2,20 @@ import json
 import time
 
 from flask import Flask, request, jsonify
+from werkzeug.datastructures import ImmutableMultiDict
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+
+
+@app.before_request
+def file_detect_chinese():
+    if request.files:
+        for item in request.files:
+            upload_file = request.files.get(item)
+            for ch in upload_file.filename:
+                if u'\u4e00' <= ch <= u'\u9fff':
+                    return
 
 
 @app.route('/admin/login', methods=['GET', 'POST'])
@@ -43,6 +54,17 @@ def upload():
         test_file()
         return 'ok'
 
+@app.route('/open_windows')
+def open_windows():
+    print(request.args.get('slang'))
+    params = request.args.copy()
+    params._mutable = True
+    params['slang'] = 444
+
+    print(request.args.get('slang'))
+    # print(type(request.args.get('slang')))
+    # print(jsonify({'aa':555}))
+    return 'ddd'
 
 def test_file():
     print('666666')

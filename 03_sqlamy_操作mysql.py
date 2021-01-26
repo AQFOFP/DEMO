@@ -1,5 +1,8 @@
 # 创建连接相关
-from sqlalchemy import create_engine
+import random
+import time
+
+from sqlalchemy import create_engine, func, and_
 
 # 和 sqlapi 交互，执行转换后的 sql 语句，用于创建基类
 from sqlalchemy.ext.declarative import declarative_base
@@ -50,6 +53,12 @@ class Users(Base):
     group = relationship('Groups',  # 字符串类型的映射类名称。
                          backref='user')
 
+
+class MonitorRoom(Base):
+    __tablename__ = 't_monitor_room'
+    room_type = Column(String(32), primary_key=True)
+    room_id = Column(String(32), primary_key=True)
+
 def init_db():
     """创建所有定义的表到数据库中"""
     Base.metadata.create_all(engine)
@@ -85,17 +94,89 @@ def init_data():
     session.commit()
 
 
+class RoomTime(Base):
+    __abstract__ = True
+    __table_args__ = {
+        'mysql_engine': 'InnoDB',
+        'mysql_charset': 'utf8'
+    }
+    id = Column(Integer, primary_key=True)
+    uid = Column(String(32), nullable=False)
+    online_time = Column(Integer)
+
+
+base_cls_tb_cfg={"RoomTime":["room_time",RoomTime],}
+id_part_class_dict = dict()
+
+
+def get_mysql_log_model(session, base_name, part_id=None):
+
+    def get_month():
+        now = int(time.time())
+        today_gmt3_time_stamp = now - 9000
+        today_gmt3_time_stamp_array = time.localtime(today_gmt3_time_stamp)
+        month_s = time.strftime('%Y_%m', today_gmt3_time_stamp_array)
+        return month_s
+
+    part_id = part_id or get_month()
+    base_list = base_cls_tb_cfg.get(base_name, ["s_unkown_table",None])
+    base_table, base_obj = base_list[0], base_list[1]
+    if base_obj:
+        cls_name, table_name = base_name+'%s' % part_id, base_table+'_%s' % part_id
+        if cls_name not in id_part_class_dict:
+            cls = type(cls_name, (base_obj,), {'__tablename__': table_name})
+            id_part_class_dict[cls_name] = cls
+            session.execute("create table if not exists {} like {}".format(table_name,base_table))
+            # global exists_table
+            # if table_name not in exists_table:
+            #     try:
+            #         session.execute("create table if not exists %s like s_start_app" % table_name)
+            #     except Exception as e:
+            #         print("create table if not exists error={}".format(e))
+            #     else:
+            #         exists_table.add(table_name)
+
+        return id_part_class_dict[cls_name]
+    else:
+        return None
+
+
 if __name__ == '__main__':
     # # 执行创建表
     # init_db()
     #
     # # 初始化数据
     # init_data()
+    start = '2020-12-27'
+    end = '2021-01-02'
+    date_nm_start = start[:7].replace('-', '_')  # 获取年月
+    date_nm_end = end[:7].replace('-', '_')  # 获取年月
+    RoomTimeStart = get_mysql_log_model(session, "RoomTime", part_id=date_nm_start)
+    try:
+        session.query(RoomTimeStart).filter(RoomTimeStart.uid == 'eee').update({RoomTimeStart.online_time:'yyyy'})
+    except Exception as e:
+        print(e)
+        # session.commit()
+        # session.close()
 
-    user_objs = session.query(Users).filter(Users.name.like('%P%')).all()
-    # print(user_objs)
-    for item in user_objs:
-        item.name = item.name.replace('P', 'HTTP')
-        session.add(item)
-    session.commit()
 
+
+
+
+    # RoomTimeEnd = get_mysql_log_model(session, "RoomTime", part_id=date_nm_end)
+    # # RoomTimeStart.
+    #
+    # # result1 = session.query(RoomTimeStart.online_time)
+    # # result2 = session.query(RoomTimeEnd.online_time)
+    # result1 = session.query(RoomTimeStart.uid, RoomTimeStart.online_time)
+    # result2 = session.query(RoomTimeEnd.uid, RoomTimeEnd.online_time)
+    # # res = result1.union_all(result2)
+    # # res = result1.union_all(result2).having(func.sum(RoomTimeEnd.online_time)).scalar()
+    # res = result1.union_all(result2).distinct(RoomTimeEnd.uid, RoomTimeEnd.online_time)
+    # # print(result)
+    # # for item in res:
+    # #     print(item.uid)
+    # print(res)
+    #
+    #
+    #
