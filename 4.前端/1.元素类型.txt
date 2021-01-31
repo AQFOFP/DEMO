@@ -1,0 +1,349 @@
+﻿标签：
+p、a、div、span、ul、ol、li、h1~h6、i、em、hr、img、video、audio、
+dl、dt、dd、form、input、button、table、tr、td、textarea
+
+
+1.元素类型
+块元素
+特征：独占一行，可以设置宽高
+高度若不给，默认情况下它的高度是由它的内容决定
+例如：div，p，h1~h6、ul、ol、li、hr、dl、dt、dd、form、table、tr、td
+
+行内元素
+特征：不独占一行，设置不上宽高，宽高由内容来决定
+例如：span，a，i，em，b,strong，
+
+行内块元素
+隶属行内元素
+特点：不但具有行内元素的特征，还具有块元素的特征，不独占一行，又可以设置宽高
+例如：img,button、video、input、textarea
+
+元素类型转换：
+display属性来进行转
+
+display: block;
+display: inline-block; 
+
+换行符/空格间隙问题:
+元素被当成行内元素排版的时候，元素之间的空白符（空格、回车换行等）都会被浏览器处理，
+根据white-space的处理方式（默认是normal，合并多余空白），原来HTML代码中的回车换行
+被转成一个空白符，在字体不为0的情况下，空白符占据一定宽度，
+所以inline-block的元素之间就出现了空隙
+当行内元素font-size:16px时，间距为8px。
+
+解决：
+1、将前一个标签结束符和后一个标签开始符写在同一行
+2、为父元素中设置font-size: 0，在子元素上重置正确的font-size
+3、设置子元素margin值为负数
+4、设置父元素，word-spacing:-1em;  # word-spacing属性增加或减少字与字之间的空白
+
+
+将元素隐藏（不占位置）
+display: none;
+
+2.浮动：（使用浮动只浮动了一层）
+float属性
+left左浮动
+right右浮动
+作用：可以将块元素进行横向排
+
+高度塌陷：
+	当父元素没有设置高度，所有的子元素都添加了浮动，这时候，父元素的高度为0
+	解决：
+	1.给父元素添加高度
+	2.给父元素添加补丁 overflow:hidden;
+            Block Formatting Context 块级格式化环境
+	    BFC是元素的隐含属性，默认是在关闭状态的
+	    设置overflow为一个非默认值，一般用overflow：hidden开启BFC
+
+	3.给父元素添加一个空的子元素，然后给子元素添加clear:both
+
+类似ps图层一样，div元素本身是一层，如果在div里面加文字,相当于加了文字层，
+当我们div元素因为前面的元素浮动，造成本div会嵌入的浮动元素中，但文字却在浮动元素之后，
+说明在div里加的文字与浮动的元素同一层，就是文字层
+
+清除掉其他元素浮动对当前元素产生的影响，可以用clear来完成功能
+clear可以用来清除其他浮动元素对当前元素的影响
+
+3.页面布局
+先对页面进行划分，先从上往下进行划分，然后在上面划分的基础上
+再从左往右进行划分。
+注意：划分的时候【页面分区】使用div来进行分	
+
+4.盒子模型
+计算盒子【标签】占据的宽度
+在html中每个标签都可以看做是一个矩形的盒子。
+盒子实际占据的宽度 = margin-left + margin-right + border-left+border-right
++ padding-left+padding-right+width
+
+
+5.在html中列表分为三种
+	1.无序列表
+	一般用于序列，或者导航
+			
+	2.有序列表
+	type：类型  1默认，a，A，i，I
+	start:从xx开始
+	一般用于排行榜
+			
+	3.自定义列表
+	一般用于上图下文本
+
+6.定位：position(提升2层)
+	与四个方位联合使用，left，right，top，bottom
+	1.相对定位 relative
+	参照物：自己原本的位置，相对于自己原本的位置来进行定位的。
+	仍然占据自己原本的位置【不脱离文档流的】
+			
+	2.绝对定位absolute
+	参照物：具有定位属性的父元素【若当父元素中不含有定位属性的时候，则去找body】
+	定位属性【可以是相对定位，也可以是绝对定位，也可以是固定定位】
+	不占据自己原本的位置【脱离文档流的()】
+			
+	一般情况下，绝对定位与相对定位一起连用，给父元素添加相对定位，让父元素变成一个包含块
+	给子元素添加绝对定位，让子元素在父元素中进行定位。
+
+	两个元素都定位到同一个地方会覆盖，使用z-index可以改变前后顺序
+			
+	3.固定定位fixed
+	参照物：当前窗口，它与自己书写的位置无关，与父元素也无关。以当前窗口为参照物进行定位。
+	不占据自己原本的位置【脱离文档流的】
+
+	注意：通常情况下，相对定位与绝对定位一起使用，一般情况下，若想让子元素在父元素
+	中进行定位，我们首先给父元素添加相对定位，让父元素变成一个包含块，再给子元素添加
+	绝对定位，使子元素在父元素中进行定位。
+	一般情况下，固定的导航或者广告栏我们可以使用固定定位。
+	【它的位置不会随着页面内容的拖动发生变化的，它的位置只与当前窗口有关系】
+
+7.选择器权重及优先级
+	* 通配符    权重 0
+	标签选择器    1
+	类选择器     10
+	伪类选择器   10
+	id选择器     100
+	包含选择器   各个选择器权重之和
+	群组选择器   等于各自的权重  .box,#pp,p{}
+	当样式出现冲突的时候，权重高的会将权重低的覆盖，
+	权重若相同，后写的会将前面写的覆盖
+
+内联样式>id选择器>class选择器>标签选择器
+
+8.添加css样式的方式
+	内联样式
+	在标签内直接使用style属性，来给标签添加样式的这种方式我们称之为内联样式【不建议使用】
+	使用此方法添加的样式，不便于复用。
+
+	内部样式
+	在html页面中，通过style标签来添加样式的这种方式，我们称之为内部样式。
+
+	外部样式
+	在css文件夹中新建一个.css文件，并使用link标签将.css文件链接到html文件中的这种方式
+	我们称之为外部样式。
+	  	
+	注意：当代码非常多的情况下，我们建议css与html分离来写，这样就使用外部样式，
+	若代码不是非常多，便于更改的情况下，也可以直接使用内部样式。
+	一个html页面可以链接多个css文件，也可以添加多个style标签。
+	权重：内联样式权重最高，内部样式与外部样式权重相同，出现冲突的取决于书写的先后顺序。	 
+
+9.html与css语法对比
+	html的语法
+	<标签 属性1="属性值1" 属性2="属性值2"></标签>
+	html中的注释：
+	<!-- 注释  -->
+	css的语法
+	选择器{
+		属性1:属性值1;
+		属性2:属性值2;
+		...
+	}
+	css中的注释
+	/*  注释   */	 
+	 	
+10.css中常用的属性：
+	1em=16px
+	width：宽度
+	height：高度
+	line-height：行高  【当行高与高度相等的时候，单行文本可以自动垂直居中显示】
+	font-size：字体大小
+	font-weight：字体粗细(bold)
+	font-family: "宋体";
+	color：字体颜色
+	text-align:文本对齐方式  center：水平居中显示
+	text-decoration:文本装饰
+	text-indent: 30px;   缩进 
+	letter-spacing: 10px;  /* 字符间距 */  
+	underline：下划线  none：去除文本装饰  linethrough：删除线  overline：顶线
+	outline  input输入框时浏览器外发光
+	border：边框
+	参数一：边框宽度 参数二：边框的样式  参数三：边框的颜色  
+	border: 1px solid green;
+	border-width: 2px;
+	border-width: 10px;
+	border-width: 10px 30px;  /* 上下10 左右30 */
+	border-width: 10px 30px 10px;  /* 上右下左 */
+	border-width: 10px 30px 10px 30px; /* 上右下左 */
+	border-color: red;
+	border-style: dashed;  # solid实线、dashed虚线、dotted点线、double双线
+	border：none 去除边框【所有的边框】
+	border-left，border-right，border-top，border-bottom
+	border-raduis:边框圆角
+
+	box-shadow:阴影
+	box-shadow: h-shadow v-shadow blur spread color inset;
+	box-shadow:2px 2px 5px #333333;	
+	参数一：水平阴影的位置【必须给】
+	参数二：垂直阴影的位置【必须给】    
+	参数三：高斯模块的距离【默认0】
+	参数四：阴影的宽度【默认0】
+	参数五：阴影的颜色以及透明度【默认黑色，不透明】
+	参数六：阴影的样式默认外阴影
+	
+	transition: all 2s;
+  	transition-property	规定设置过渡效果的 CSS 属性的名称。
+	transition-duration	规定完成过渡效果需要多少秒或毫秒。
+	transition-timing-function	规定速度效果的速度曲线。
+	transition-delay	定义过渡效果何时开始。
+
+	transform：动画
+	旋转动画:rotate(angle)，rotateX(angle),rotateY(angle)单位deg
+
+	缩放动画:scale()，scaleX(x),scaleY(y)没有单位
+	平移动画:translate(x,y)，translateX(x),translateY(y)单位px/%  分为x轴与y轴的平移
+	  	
+	overflow:溢出处理
+	hidden:超出范围的时候隐藏
+	scroll：显示滑动条
+	auto：自动显示滑动条【若显示范围没有超出显示内容，则不显示滑动条】	  	
+	margin：外边距
+	取值1：上下左右
+	取值2：参数一上下  参数二左右
+	取值4： 上  右  下 左
+	当块元素指定宽度之后，给margin-left与margin-right取值为auto的情况下
+	则此块元素可以水平居中显示。	  	
+	padding：内边距
+	与margin类似	  	
+	background: 背景
+	background: rgba(0,0,0,0.4); 不要使用opacity: 0.4; 因为其子元素也会变透明
+	参数一：背景颜色
+	参数二： 背景图片链接地址
+	参数三：背景图片的平铺方式 repeat平铺  no-repeat 不平铺  repeat-x水平平铺
+	repeat-y 垂直平铺
+	参数四：背景图片水平方向的位置  left/right/center/px/%
+	参数五：背景图片垂直方向的位置 top/bottom/center/px/%
+	background-color：背景颜色
+	background-image：背景图片的链接地址
+	background-repeat：背景图片的平铺方式
+	background-position：背景图片的位置	  	
+	background-size: 背景图片的大小
+	参数一:宽度
+	参数二：高度
+	取值为cover： 覆盖  图片覆盖盒子【图片大盒子小】
+	取值为contain：包含  盒子包含图片【图片小盒子大】
+
+11、锚链接
+超链接：指的是页面与页面之间的跳转
+若是超链接的跳转，地址栏中的地址会发生改变
+锚链接：指的是页面内的跳转
+在页面中的某个位置添加一个锚点，在锚链接的位置，
+当点击此链接则会直接跳转到锚点的位置。
+使用a标签
+任意标签，添加锚点的时候，要求必须使用id
+而锚链接的href=“#id”名
+
+<h1 id="mao">锚点</h1>
+<a href="#mao">back</a>	
+
+
+12、自动播放动画animation
+.box{
+	/*参数一：绑定在keyframes上的名称
+		参数二：动画执行需要的时间
+		参数三：动画开始之前的延迟
+		参数四：动画执行的次数  infinite 循环执行
+		参数五：动画的运动曲线 默认ease 
+		参数六：动画是否轮流反向执行 reverse反向执行
+		normal：正常执行  alternate：轮流反向播放
+		*/
+	animation:suofang 2s 1s infinite linear alternate;
+	width: 200px;
+	height: 200px;
+	background: blue;
+}
+@keyframes suofang{
+	/*0%的位置，动画开始的时候*/
+	from{transform: scale(1);}
+	/*100%的位置，动画结束的时候*/
+	to{transform: scale(2);}
+}
+
+
+
+动画制作轮播：
+.box{
+	width: 500px;
+	height: 300px;
+	background: url(img/appImages/ALLImage.png) no-repeat center center;
+	background-size:cover ;
+	animation:bg 12s infinite ;
+}
+@keyframes bg{
+	/*from{}*/
+	20%{background-image:url(img/appImages/HPSTRImage.png) ;}
+	40%{background-image: url(img/appImages/NVImage.png);}
+	60%{background-image:url(img/appImages/SDImage.png) ;}
+	80%{background-image:url(img/appImages/tpImage.png) ;}
+	/*to{}*/
+}
+
+
+animation-play-state属性 设置动画正在运行还是暂停
+animation-play-state:paused;暂停
+
+
+
+13、文件上传form设置
+表单里有图片/文件的上传
+
+
+<form enctype="multipart/form-data" method="post">
+
+
+<input type="file" name="uploadfile"/>
+
+<input type="submit" value="提交"/>
+
+</form>
+
+
+multipart/form-data 是上传二进制数据 
+form里面的input的值以2进制的方式传过去，
+所以这里要明白，使用这种格式以后，后台request就获取不到数据了。
+
+
+
+
+12、常见问题:
+
+1).设置margin-top问题：
+
+<div class="box1"><div class="box2"></div></div>
+.box2{ margin-top: 10px;}  
+内元素设置顶部margin时，会使设置父元素的margin-top，而子元素没有设置
+
+解决方法：
+1、给父元素添加补丁 overflow:hidden;
+2、将子元素浮动float:left
+
+
+2).line-height与float连用的问题：
+<div class="fu">
+	<div id="box1" class="box">box1</div>
+	<div id="box4" class="box"><div class="box5">eee</div></div>
+</div>
+
+.fu{ background: #00FFFF; width: 800px; height: 500px; line-height: 500px;}
+#box4 {width: 100px; height: 150px; background: blue; }
+
+
+box1、box4都浮动
+父元素div.fu 设置行高，那么box1、box2里面的内容会受影响,box4不能设置高度

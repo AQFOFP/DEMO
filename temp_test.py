@@ -1,6 +1,7 @@
 # coding=utf-8
 import base64
 import json
+import os
 import time
 import uuid
 
@@ -62,9 +63,10 @@ if __name__ == '__main__':
     # suid = ''.join(uid.split('-'))
     # print(type(uid))
     # print(suid)
-    ff = '11'
-    print(ff.isdigit())
-
+    mongodb_host = os.environ.get("mongo_replica_host",
+                                  "mongodb://admovie:QI23*&ad@172.31.11.226:27017,172.31.10.3:27017,"
+                                  "172.31.9.131:27017/movies")
+    print(mongodb_host)
 
 # 0e705186-2820-11eb-b5d8-28e34735abda
 # 0e705186282011ebb5d828e34735abda

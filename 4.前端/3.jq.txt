@@ -1,0 +1,298 @@
+js对象转换为jq对象
+var foo = document.getElementById(“foo”);
+$(foo)
+
+jq对象转换为js对象
+（1）jQuery对象是一个类似数组的对象，可以通过[index]的方法得到相应的DOM对象
+	var $foo = $(“#foo”);
+	var foo = $foo[0];
+
+（2）另一种方法是jQuery本身提供的，通过get(index)方法得到相应的DOM对象
+	var $foo = $(“#foo”);
+	var foo = $foo.get(0);
+
+1、选择器
+
+$('#box').css('color','red')
+$('div').css('background-color','pink')
+$('.foo').css({color: 'red',fontSize:30})
+$('.foo').css({color: 'red','font-size':'30px'})
+$('*').css({fontFamily:"宋体"})
+$('#box, #box2').css({fontSize:20})
+
+
+//后代选择器
+$('#box3 input').css({background:'greenyellow'})
+$('#box3').find('input').css({background:'greenyellow'})
+
+
+//子选择器		
+$('#box3>input').css({background:'pink'})
+$('#box3').children('input').css({background:'pink'})
+
+
+
+//父节点
+$('#box4').parent().css({background:'greenyellow'})
+
+
+//祖先节点
+$('#box4').parents('body').css({background:'#123456'})*/
+
+//兄弟选择器
+$('#box3').siblings('div').css({background:'#123456'})  //匹配#box3元素前面或后面div元素,兄弟
+		
+		
+//下一个相邻选择器
+$('#box3+div').css({background:'#123456'}) //匹配#box3元素后面相邻的div元素,#box3与div之间不能夹有其他元素
+$('#box3').next('div').css({background:'#123456'})  //匹配#box3元素后面相邻的div元素,#box3与div之间不能夹有其他元素
+		
+			
+//上一个相邻选择器
+$('#box3').prev('div').css({background:'#123456'})  //匹配#box3元素前面相邻的div元素,#box3与div之间不能夹有其他元素
+		
+		
+//元素之前/之后选择器
+$('#box3').prevAll('div').css({background:'#123456'})    //匹配#box3元素之前的所有div元素
+		
+$('#box3~div').css({background:'#123456'})  //匹配#box3元素之后的所有div元素
+$('#box3').nextAll('div').css({background:'#123456'})  //匹配#box3元素之后的所有div元素
+		
+
+//伪类选择器
+//:first 选择第一个li
+$('ul li:first').css({background:'green'})
+$('ul li').first().css({background:'green'})
+		
+//:last,选择最后一个li
+$('ul li:last').css({background:'green'})
+$('ul li').last().css({background:'green'})
+
+//:eq(index) 选择第index个
+$('ul li:eq(3)').css({background:'green'})
+$('ul li').eq(3).css({background:'green'})
+		
+//:even  偶数/ odd奇数
+$('ul li:even').css({background:'pink'})
+$('ul li:odd').css({background:'yellow'})
+
+
+
+//:first-child: 匹配每个ul的第一个li
+$('ul li:first-child').css({background:'yellow'})
+		
+//:last-child: 匹配每个ul的最后一个li
+$('ul li:last-child').css({background:'yellow'})
+
+2、jq操作元素属性
+
+//行内属性
+$('img').attr('src')  //获取元素的行内属性，默认获取一个
+$('img').attr('alt','rr')  //attr(参数1,参数2) 修改/添加  修改/添加是批量添加、修改
+$('img').eq(0).removeAttr('src') //删除元素行内某属性
+
+$('li').addClass('foo1')  //为元素加class属性，class="fool"
+$('li').removeClass('foo1')  //为元素删除class属性，class="fool"
+$('li').hasClass('foo1')   //判断元素是否有class="fool"属性
+
+
+$('p').html()                        //获取元素的内容
+$("p").html("Hello <b>world</b>!")   //设置元素的内容
+
+
+$("input").val()               //获取文本框中的值
+$("input").val("hello world!") //设置文本框中的值
+
+
+
+
+3、jq操作元素
+
+var div1 = $('<div><b>马云</b></div>')  //创建节点
+
+$('#box').append(div1)   //在元素#box加入子节点div1
+div1.appendTo("#box")    //将节点加到#box的子节点下
+
+
+$('#box').remove()  //删除节点，其子节点也删除
+$('#box').empty()  //清空该节点下的子节点，其下面子节点都被删除
+
+
+var clo = $('.btn').clone(true)  //克隆一个.btn节点，true-表示节点事件也复制
+$('.btn').clone(true).insertAfter('#clone')  //克隆一个.btn节点,并把该节点插入#clone的后面
+
+4、jq操作样式
+
+$('img').css('width')  // 获取元素一个样式
+
+$('img').css({'width':'100px'})  // 设置元素样式
+
+
+$('#box').offset() //获取匹配元素相对当前视口的相对偏移
+$('#box').offset().top
+$('#box').offset().left
+
+
+5、jq事件
+
+// on: 添加事件（可以多个）
+$('#btn').on({'click': function(){console.log('click')},
+	      'mouseenter': function(){console.log('mouseenter')}
+	})
+
+
+
+// 使用on事件委托
+$('#tab').on('click', 'a', function(){
+				console.log('删除')
+				$(this).parents('tr').remove()
+		})
+
+// off: 删除事件（可以多个）
+$('#box').off('mousemove mouseup'):   //删除事件
+
+
+// trigger: 主动触发事件,会触发浏览器默认行为(当某个事件执行完之后，可以利用trigger触发某标签上的事件)
+// triggerHandler: 主动触发事件
+$('#btn').trigger('click')
+$('#btn').triggerHandler('mouseenter')
+
+
+//hover(参数1,参数2)  //鼠标移入所选元素，执行参数1的function，移出时执行参数2的function
+$("td").hover(function(){$(this).addClass("hover");}, 
+	      function(){$(this).removeClass("hover");}
+	     );
+
+//当元素获得焦点时，触发 focus 事件
+$("input[type=text]").focus(function(){
+  this.blur();
+});
+
+
+//当元素失去焦点时触发 blur 事件。
+$("p").blur( function () { alert("Hello World!"); } );
+
+
+mousedown()、mouseup(）、mouseenter(）、mouseleave(）、mousemove(）
+e.offsetX,e.offsetY
+
+console.log($('div').innerWidth())  //内部width+padding
+console.log($('div').outerWidth())  //内部width+padding+border
+console.log($('div').outerWidth(true))  //内部width+padding+border+margin
+
+
+6、js特效
+
+
+$("p").show()  //显示隐藏的匹配元素
+$("p").hide("slow")  //隐藏显示的元素
+$('td').toggle()   //如果元素是可见的，切换为隐藏的；如果元素是隐藏的，切换为可见的。
+
+
+speed:三种预定速度之一的字符串("slow","normal", or "fast")或表示动画时长的毫秒数值(如：1000)
+easing:(Optional) 用来指定切换效果，默认是"swing"，可用参数"linear"
+fn:在动画完成时执行的函数，每个元素执行一次。
+
+
+//通过高度变化（向下增大）来动态地显示所有匹配的元素，在显示完成后可选地触发一个回调函数
+$("div").slideDown("fast",function(){ alert("Animation Done."); }); 
+$('div').slideDown(3000)
+
+//通过高度变化（向上减小）来动态地隐藏所有匹配的元素，在隐藏完成后可选地触发一个回调函数
+$("div").slideUp("fast",function(){ alert("Animation Done."); });
+$('div').slideUp(3000)
+
+
+//通过高度变化来切换所有匹配元素的可见性，并在切换完成后可选地触发一个回调函数
+$("div").slideToggle("fast",function(){alert("Animation Done."); });
+$("div").slideToggle(3000)
+
+
+//通过不透明度的变化来实现所有匹配元素的淡入效果，并在动画完成后可选地触发一个回调函数
+$("p").fadeIn("fast",function(){alert("Animation Done.");});
+
+//通过不透明度的变化来实现所有匹配元素的淡出效果，并在动画完成后可选地触发一个回调函数
+$("p").fadeOut("fast",function(){alert("Animation Done.");});
+
+
+//把所有匹配元素的不透明度以渐进方式调整到指定的不透明度，并在动画完成后可选地触发一个回调函数
+$("p").fadeTo("fast", 0.25, function(){alert("Animation Done."); });
+
+
+animate
+同时执行多个属性的动画
+$('#box').animate({left: 200, top: 300}, 3000, function(){
+			console.log('动画结束')
+ 			})
+
+
+
+// 动画队列
+$('#box').animate({left: 200}, 1000)
+	 .animate({top: 300}, 1000)
+	 .fadeOut(1000)
+	 .fadeIn(1000)
+	 .animate({width: 200}, 1000)
+	 .animate({height: 200}, 1000)
+
+
+ $('#stop').click(function(){
+		$('#box').stop()  // 只能停止当前正在执行的动画
+		$('#box').stop(true)  // 停止所有动画
+		})
+
+//禁用的动画
+jQuery.fx.off = true;
+$.fx.off = true
+
+
+//设置动画的显示帧速
+$.fx.interval = 100
+
+
+7、js-Ajax
+$('#btn2').click(function(){
+	
+	// type: 请求方式, 默认是get
+	// url: 接口, 必需参数
+	// async: 是否异步, 默认是true
+	// data: 参数
+	// success: 请求成功后的回调函数
+	// error: 请求失败的回调函数
+	$.ajax({
+		// type: "POST",
+		url: "json/person1.json",
+		// async: true,
+		// data: {name: 'zs'},
+		
+		success: function (res) {
+			console.log(res)  // JS对象
+		},
+		error: function (e) {
+			console.log(e)
+		}
+	})
+	
+	// $.get
+	$.get("json/person.json", function(res){
+		console.log(res)
+	})
+	
+	// $.post
+	$.post("json/person.json", {}, function(res){
+		console.log(res)
+	})
+	
+})
+
+
+
+
+
+8、jq阻止事件冒泡与阻止浏览器默认行为
+
+$("#box").click(function(event) {
+	
+	event.stopPropagation();  //阻止冒泡 
+	event.preventDefault();  //阻止默认行为
+});
