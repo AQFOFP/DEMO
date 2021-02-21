@@ -2,7 +2,7 @@
 import random
 import time
 
-from sqlalchemy import create_engine, func, and_
+from sqlalchemy import create_engine, func, and_, union_all
 
 # 和 sqlapi 交互，执行转换后的 sql 语句，用于创建基类
 from sqlalchemy.ext.declarative import declarative_base
@@ -141,6 +141,44 @@ def get_mysql_log_model(session, base_name, part_id=None):
         return None
 
 
+def get_part_month_field_union(session, model, date_s, date_e, field_list):
+    date_sn, date_sm = int(date_s[:4]), int(date_s[5:7])
+    temp_sn, temp_sm = date_sn, date_sm
+    date_en, date_em = int(date_e[:4]), int(date_e[5:7])
+
+    date_nm = set()
+    while True:
+        if temp_sn == date_en and temp_sm == date_em:
+            date_nm.add(str(temp_sn) + '_' + str(temp_sm if temp_sm > 10 else '0'+str(temp_sm)))
+            break
+        else:
+            date_nm.add(str(temp_sn) + '_' + str(temp_sm if temp_sm > 10 else '0' + str(temp_sm)))
+
+        temp_sm += 1
+        if temp_sm >= 13:
+            temp_sn += 1
+            temp_sm = 1
+    print(date_nm)
+    if not date_nm:
+        return None
+    elif len(date_nm) == 1:
+        Model = get_mysql_log_model(session, model, part_id=date_nm.pop())
+        return session.query(*[getattr(Model, item) for item in field_list])
+    else:
+
+        model_list = [get_mysql_log_model(session, model, part_id=part) for part in date_nm]
+        model_query = [session.query(*[getattr(m_one, item) for item in field_list]) for m_one in model_list]
+        model_union = None
+        for rn, query in enumerate(model_query):
+
+            if rn == 0:
+                model_union = query
+            else:
+                model_union = model_union.union_all(query)
+        return model_union
+
+
+
 if __name__ == '__main__':
     # # 执行创建表
     # init_db()
@@ -149,33 +187,32 @@ if __name__ == '__main__':
     # init_data()
     start = '2020-12-27'
     end = '2021-01-02'
-    date_nm_start = start[:7].replace('-', '_')  # 获取年月
-    date_nm_end = end[:7].replace('-', '_')  # 获取年月
-    RoomTimeStart = get_mysql_log_model(session, "RoomTime", part_id=date_nm_start)
-    try:
-        session.query(RoomTimeStart).filter(RoomTimeStart.uid == 'eee').update({RoomTimeStart.online_time:'yyyy'})
-    except Exception as e:
-        print(e)
-        # session.commit()
-        # session.close()
-
-
-
-
-
+    # date_nm_start = start[:7].replace('-', '_')  # 获取年月
+    # date_nm_end = end[:7].replace('-', '_')  # 获取年月
+    # RoomTimeStart = get_mysql_log_model(session, "RoomTime", part_id=date_nm_start)
     # RoomTimeEnd = get_mysql_log_model(session, "RoomTime", part_id=date_nm_end)
-    # # RoomTimeStart.
     #
-    # # result1 = session.query(RoomTimeStart.online_time)
-    # # result2 = session.query(RoomTimeEnd.online_time)
-    # result1 = session.query(RoomTimeStart.uid, RoomTimeStart.online_time)
+    # # RoomTimeEnd = get_mysql_log_model(session, "RoomTime", part_id=date_nm_end)
+    # # # RoomTimeStart.
+    # #
+    # # print(dir(RoomTimeStart))
+    #
+    # result1 = session.query(*[getattr(RoomTimeStart, item) for item in ['uid', 'online_time']])
     # result2 = session.query(RoomTimeEnd.uid, RoomTimeEnd.online_time)
-    # # res = result1.union_all(result2)
-    # # res = result1.union_all(result2).having(func.sum(RoomTimeEnd.online_time)).scalar()
+    # res = result1.union_all(result2)
+    # dd = session.query(res)
+    res = get_part_month_field_union(session, model="RoomTime", date_s=start, date_e=end, field_list=['uid'])
+
+    # res = result1.union_all(result2).filter(RoomTimeStart.online_time > 30)
+    # res = result1.union_all(result2).having(func.sum(RoomTimeEnd.online_time)).scalar()
     # res = result1.union_all(result2).distinct(RoomTimeEnd.uid, RoomTimeEnd.online_time)
-    # # print(result)
-    # # for item in res:
-    # #     print(item.uid)
+    print(res)
+    # print(dd)
+
+    for item in res:
+        # print(item.room_time_2020_12_id)
+        # print(dir(item))
+        print(item.uid)
     # print(res)
     #
     #
