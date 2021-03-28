@@ -141,7 +141,7 @@ def get_mysql_log_model(session, base_name, part_id=None):
         return None
 
 
-def get_part_month_field_union(session, model, date_s, date_e, field_list):
+def get_part_month_field_union(session, model, date_s, date_e, field_list, filters):
     date_sn, date_sm = int(date_s[:4]), int(date_s[5:7])
     temp_sn, temp_sm = date_sn, date_sm
     date_en, date_em = int(date_e[:4]), int(date_e[5:7])
@@ -158,16 +158,15 @@ def get_part_month_field_union(session, model, date_s, date_e, field_list):
         if temp_sm >= 13:
             temp_sn += 1
             temp_sm = 1
-    print(date_nm)
+
     if not date_nm:
         return None
     elif len(date_nm) == 1:
         Model = get_mysql_log_model(session, model, part_id=date_nm.pop())
-        return session.query(*[getattr(Model, item) for item in field_list])
+        return session.query(*[getattr(Model, item).label(item) for item in field_list]).filter(*filters).subquery()
     else:
-
         model_list = [get_mysql_log_model(session, model, part_id=part) for part in date_nm]
-        model_query = [session.query(*[getattr(m_one, item) for item in field_list]) for m_one in model_list]
+        model_query = [session.query(*[getattr(m_one, item).label(item) for item in field_list]).filter(*filters) for m_one in model_list]
         model_union = None
         for rn, query in enumerate(model_query):
 
@@ -175,7 +174,7 @@ def get_part_month_field_union(session, model, date_s, date_e, field_list):
                 model_union = query
             else:
                 model_union = model_union.union_all(query)
-        return model_union
+        return model_union.subquery()
 
 
 
@@ -186,33 +185,21 @@ if __name__ == '__main__':
     # # 初始化数据
     # init_data()
     start = '2020-12-27'
-    end = '2021-01-02'
-    # date_nm_start = start[:7].replace('-', '_')  # 获取年月
-    # date_nm_end = end[:7].replace('-', '_')  # 获取年月
-    # RoomTimeStart = get_mysql_log_model(session, "RoomTime", part_id=date_nm_start)
-    # RoomTimeEnd = get_mysql_log_model(session, "RoomTime", part_id=date_nm_end)
-    #
-    # # RoomTimeEnd = get_mysql_log_model(session, "RoomTime", part_id=date_nm_end)
-    # # # RoomTimeStart.
-    # #
-    # # print(dir(RoomTimeStart))
-    #
-    # result1 = session.query(*[getattr(RoomTimeStart, item) for item in ['uid', 'online_time']])
-    # result2 = session.query(RoomTimeEnd.uid, RoomTimeEnd.online_time)
-    # res = result1.union_all(result2)
-    # dd = session.query(res)
-    res = get_part_month_field_union(session, model="RoomTime", date_s=start, date_e=end, field_list=['uid'])
+    end = '2021-01-30'
+    filters = set()
+    filters.add(Column('online_time') > 60)
 
-    # res = result1.union_all(result2).filter(RoomTimeStart.online_time > 30)
-    # res = result1.union_all(result2).having(func.sum(RoomTimeEnd.online_time)).scalar()
-    # res = result1.union_all(result2).distinct(RoomTimeEnd.uid, RoomTimeEnd.online_time)
-    print(res)
+    res = get_part_month_field_union(session, model="RoomTime", date_s=start, date_e=end,
+                                     field_list=['uid', 'online_time'], filters=filters)
+
+    dd = session.query(res.c.uid, res.c.online_time).all()
+    # # ff = res.filter(RoomTimeModel.online_time >= 666).distinct(RoomTimeModel.uid).count()
     # print(dd)
-
-    for item in res:
+    #
+    for rn, item in enumerate(dd):
         # print(item.room_time_2020_12_id)
         # print(dir(item))
-        print(item.uid)
+        print(item.uid, item.online_time)
     # print(res)
     #
     #

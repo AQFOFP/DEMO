@@ -80,46 +80,32 @@ if __name__ == '__main__':
     # print(suid)
     # get_register_str(ObjectId('600c39a532a61091e2d5fc07'))
     # print(30 * 12 * 60 * 60)
-    date_nm = set()
-    date_s = '2020-10-01'
-    date_e = '2021-01-09'
-    date_sn, date_sm = int(date_s[:4]), int(date_s[5:7])
-    temp_sn, temp_sm = date_sn, date_sm
-    date_en, date_em = int(date_e[:4]), int(date_e[5:7])
+    from threading import Thread
+    from threading import local
+    import threading
+    import time
+    from threading import get_ident
 
-    # date_nm.add()
-    while True:
-        temp_sm += 1
-        if temp_sm >= 13:
-            temp_sn += 1
-            temp_sm = 1
+    # 特殊的对象
+    xianglong = local()
 
-        if temp_sn == date_en and temp_sm == date_em:
-            date_nm.add(str(temp_sn) + '_' + str(temp_sm if temp_sm > 10 else '0'+str(temp_sm)))
-            break
+
+    def task(arg):
+        # 对象.val = 1/2/3/4/5
+        # print(threading.get_ident())
+        ss = getattr(xianglong, 'value', None)
+        if ss:
+            ss.value = arg
+            time.sleep(2)  # 亲亲翔龙
+            print(99999)
+            print(ss.value)
         else:
-            date_nm.add(str(temp_sn) + '_' + str(temp_sm if temp_sm > 10 else '0' + str(temp_sm)))
-
-    print(date_nm)
-
-    dd = set()
-    dd.add(1)
-    dd.
-    # from_day, end_day = datetime.datetime.strptime(date_s, '%Y-%m-%d'), datetime.datetime.strptime(date_e, '%Y-%m-%d')
-    # dd = [(from_day + datetime.timedelta(_)).strftime(r"%b-%y") for _ in range((end_day - from_day).days)]
-    # print(dd)
-    # data_nm_s = date_s[:7].replace('-', '_')
-    # data_nm_e = date_e[:7].replace('-', '_')
-    # from_month, end_month = datetime.datetime.strptime(data_nm_s, '%Y_%m'), datetime.datetime.strptime(data_nm_e, '%Y_%m')
-    # diff_month = end_month - from_month
-    # print(diff_month)
-    # result = []
-    # for i in range(0, diff_month.):
-    #     tmp_day = from_day + datetime.timedelta(i)
-    #     result.append(tmp_day.strftime('%Y-%m-%d'))
+            xianglong.value = arg
+            print(xianglong.__str__())
+            time.sleep(2)  # 亲亲翔龙
+            print(xianglong.value)
 
 
-
-
-# 0e705186-2820-11eb-b5d8-28e34735abda
-# 0e705186282011ebb5d828e34735abda
+    for i in range(10):
+        t = Thread(target=task, args=(i,))
+        t.start()

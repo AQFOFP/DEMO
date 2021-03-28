@@ -1,5 +1,6 @@
 # 创建连接相关
 import random
+import threading
 import time
 
 from sqlalchemy import create_engine, func, and_, Date, desc
@@ -13,11 +14,11 @@ from sqlalchemy import Column
 # 表中字段的属性
 from sqlalchemy import Integer, String, ForeignKey
 from sqlalchemy import UniqueConstraint, Index
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import sessionmaker, relationship, scoped_session
 
 # 创建连接对象，并使用 pymsql 引擎
 conn_str = "mysql+mysqlconnector://root:root@127.0.0.1:3306/db_2006"
-engine = create_engine(conn_str, encoding='utf-8', echo=False, pool_size=20, max_overflow=10, pool_recycle=14000)
+engine = create_engine(conn_str, encoding='utf-8', echo=False, pool_size=10, max_overflow=10, pool_recycle=5)
 
 # 创建基类
 Base = declarative_base()
@@ -25,7 +26,7 @@ Base = declarative_base()
 
 # 创建会话实例对象
 Session = sessionmaker(bind=engine)
-session = Session()
+
 
 
 class Mony(Base):
@@ -44,22 +45,34 @@ class OpBigR(Base):
     last_30_charge = Column(Integer, nullable=False, default=0)
 
 
+def th_ss():
+    sess = Session()
+    print(sess.query(Mony).filter(Mony.money >= 0).all())
+    time.sleep(5)
+
+
 if __name__ == '__main__':
-    results = session.query(Mony.uid, OpBigR.loss_level, func.sum(Mony.money).label('sum_money')).\
-        join(OpBigR, and_(Mony.uid == OpBigR.user_id)).\
-        filter(Mony.recharge_date >= '2021-02-01').\
-        group_by(Mony.uid, OpBigR).\
-        having(Column('sum_money') > 600).\
-        order_by(desc('sum_money'))
+    # filter_q = set()
+    sess = Session()
+    print(sess.query(Mony).filter(Mony.money >= 0).all())
+    time.sleep(6)
+    print(sess.query(Mony).filter(Mony.money >= 0).all())
 
-    total_count = session.query(func.count(Mony.uid).label('count_uid'), func.sum(Mony.money).label('sum_money')).\
-        filter(Mony.recharge_date >= '2021-02-01', Mony.recharge_date <= '2021-02-02').first()
-    for rn, item in enumerate(results):
-        print(item.uid, '----------', item.sum_money, '-----', item.loss_level)
 
-    print(total_count)
-    print(total_count.count_uid)
-    print(total_count.sum_money)
+
+
+
+    # filter_q.add(Mony.uid.in_(['aaa']))
+    # results = session.query(Mony.uid, func.sum(Mony.money).label('sum_money')).\
+    #     group_by(Mony.uid).having(Column('sum_money').in_([436.00]))
+    # print(results)
+    # results1 = session.query(func.distinct(Mony.uid).label('d_uid')).filter(Mony.uid == 'bbb')
+    # results2 = session.query(func.distinct(Mony.uid).label('d_uid')).filter(Mony.uid == 'ccc')
+    # results3 = results.union(results2, results1)
+    # print(results3)
+    #
+    # for rn, item in enumerate(results):
+    #     print(item.uid, '----------', item.sum_money)
 
     # session.query(Mony.uid, DailyRecharge.pay_type,
     #            func.sum(DailyRecharge.recharge_money).label('sum_money'),

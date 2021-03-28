@@ -108,62 +108,10 @@ def create_es_data():
 
 if __name__ == '__main__':
     # create_es_data()
-    # body_search = {
-    #     "size": 0,
-    #     'query': {
-    #         'bool': {
-    #             # 'filter': {},
-    #             # 'filter': {'term': {'atype': 1}},
-    #             'filter': [{"range": {"mtime": {"gte": 1587933011, "lte": 1587933055}}},
-    #                        {"range": {'changed': {"lt": 0}}},
-    #                        ],
-    #         }
-    #     },
-    #     "aggs": {
-    #             'record_count_ll': {
-    #                 "terms": {
-    #                     "field": "uid.keyword",
-    #                 },
-    #                 'aggs': {
-    #                     'sub_beans': {
-    #                         'sum': {'field': 'changed'}
-    #                     },
-    #                     # "having": {
-    #                     #     "bucket_selector": {
-    #                     #         "buckets_path": {
-    #                     #             "orderCount": "_count",
-    #                     #         },
-    #                     #         "script": "params.orderCount ==1"
-    #                     #     }
-    #                     # }
-    #                 }
-    #             }
-    #         },
-    # }
-    #
-    # sub_beans = {
-    #     "size": 0,
-    #     'query': {
-    #         'bool': {
-    #             'filter': [{"range": {"mtime": {"gte": 1587933011, "lte": 1587933055}}},
-    #                        {"range": {'changed': {"lt": 0}}},
-    #                        ],
-    #         }
-    #     },
-    #     "aggs": {
-    #      "record_count_ll": {
-    #        "sum": {
-    #          "field": "changed"
-    #        }
-    #      }
-    #     }
-    # }
-    user_list = ['abc3']
     body_search = {"from": 0, "size": 10000,
                    "query": {
                        "bool": {"filter": [{"range": {"mtime": {"gte": 1587933011, "lte": 1587933055}}},
                                            {"terms": {"atype": ["1"]}},
-                                           {"terms": {"title": ["ApplePayCharge"]}}
                                            ]}},
                    # "sort": [{"mtime": {"order": "DESC"}}],
                    }
@@ -179,6 +127,15 @@ if __name__ == '__main__':
     # print(online_res)
     for item in online_res:
         print(item)
+
+    ddd = es.get(index='youstar', doc_type='diamond', id='AXXxNvDsAGasMFxiSQum')
+
+    print(ddd)
+    # es.update(index='youstar', doc_type='diamond', id='AXXxNvDsAGasMFxiSQum', body={'doc': {'desc': 'gggg'}})
+
+    # ddd = es.get(index='youstar', doc_type='diamond', id='AXXxNvDsAGasMFxiSQum')
+    #
+    # print(ddd)
 
 
     # https://blog.csdn.net/xuezhangjun0121/article/details/80745575
