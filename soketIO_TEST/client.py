@@ -32,7 +32,7 @@ def main():
     # sio.connect('http://47.52.2.140:5034/socket.io/')
     # sio.emit('custom message', {'data': 'hello'})
     # sio.send("hello")
-    sio.connect('http://localhost:5000')
+    sio.connect('http://localhost:8081')
 
 
 if __name__ == '__main__':

@@ -80,32 +80,21 @@ if __name__ == '__main__':
     # print(suid)
     # get_register_str(ObjectId('600c39a532a61091e2d5fc07'))
     # print(30 * 12 * 60 * 60)
-    from threading import Thread
-    from threading import local
-    import threading
-    import time
-    from threading import get_ident
+    import inspect
 
-    # 特殊的对象
-    xianglong = local()
+    frame = None
 
 
-    def task(arg):
-        # 对象.val = 1/2/3/4/5
-        # print(threading.get_ident())
-        ss = getattr(xianglong, 'value', None)
-        if ss:
-            ss.value = arg
-            time.sleep(2)  # 亲亲翔龙
-            print(99999)
-            print(ss.value)
-        else:
-            xianglong.value = arg
-            print(xianglong.__str__())
-            time.sleep(2)  # 亲亲翔龙
-            print(xianglong.value)
+    def foo():
+        bar()
 
 
-    for i in range(10):
-        t = Thread(target=task, args=(i,))
-        t.start()
+    def bar():
+        pass
+        global frame
+        # 获取当前函数的栈帧并赋给全局变量frame
+        frame = inspect.currentframe()
+
+
+    foo()
+    print(frame.f_code)
