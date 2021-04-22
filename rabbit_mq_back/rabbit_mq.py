@@ -122,5 +122,17 @@ class RabbitmqBox(object):
         # no_ack=True表示在回调函数中不需要发送确认标识
         self.channel.basic_consume(queue_name, callback, auto_ack=auto_ack, **kwargs)
         self.channel.start_consuming()
+        self.channel.stop_consuming()
+
+    def __enter__(self):
+        print('open-----------------------')
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        print(exc_type)
+        print(exc_val)
+        print(exc_tb)
+        print('close----------------------')
+        self.connection.close()
 
 

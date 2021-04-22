@@ -3,6 +3,7 @@ import base64
 import datetime
 import json
 import os
+import random
 import time
 import uuid
 from collections import OrderedDict
@@ -63,6 +64,19 @@ def get_register_str(actor_id):
         register_day_str = 0
 
 
+class Sample:
+    def __enter__(self):
+        # 获取资源
+        print("enter")
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        #释放资源
+        print("exit")
+
+    def do_something(self):
+        print ("doing something")
+
 
 
 
@@ -80,21 +94,5 @@ if __name__ == '__main__':
     # print(suid)
     # get_register_str(ObjectId('600c39a532a61091e2d5fc07'))
     # print(30 * 12 * 60 * 60)
-    import inspect
-
-    frame = None
-
-
-    def foo():
-        bar()
-
-
-    def bar():
-        pass
-        global frame
-        # 获取当前函数的栈帧并赋给全局变量frame
-        frame = inspect.currentframe()
-
-
-    foo()
-    print(frame.f_code)
+    with Sample() as sample:
+        sample.do_something()

@@ -3,7 +3,7 @@ import random
 import threading
 import time
 
-from sqlalchemy import create_engine, func, and_, Date, desc
+from sqlalchemy import create_engine, func, and_, Date, desc, case
 
 # 和 sqlapi 交互，执行转换后的 sql 语句，用于创建基类
 from sqlalchemy.ext.declarative import declarative_base
@@ -54,9 +54,13 @@ def th_ss():
 if __name__ == '__main__':
     # filter_q = set()
     sess = Session()
-    print(sess.query(Mony).filter(Mony.money >= 0).all())
-    time.sleep(6)
-    print(sess.query(Mony).filter(Mony.money >= 0).all())
+    xpr = case([(Mony.uid == 'ccc', 'ccccv')], else_='ooo').label("full_name")
+    dddc = sess.query(func.count(Mony.uid).label('dddd')).filter(Mony.money >= 0).first()
+    # dddc = sess.query(Mony.uid, xpr).filter(Mony.money >= 0)
+    # for item in dddc:
+    print(dddc.dddd)
+    # time.sleep(6)
+    # print(sess.query(Mony).filter(Mony.money >= 0).all())
 
 
 

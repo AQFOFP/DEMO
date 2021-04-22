@@ -62,14 +62,21 @@ def mongoorm():
 
 if __name__ == '__main__':
     # savexl()
-    mongoorm()
+    # mongoorm()
     # dd = '2018-1-7'
     # doj = datetime.datetime.strptime(dd, '%Y-%m-%d')
-    from collections import Iterable
+    # date_key = int((datetime.datetime.utcnow() + datetime.timedelta(hours=3)).strftime("%Y%m%d"))
+    # print(datetime.datetime.utcnow() + datetime.timedelta(hours=3))
 
-    print(isinstance('abc', Iterable))  # str是否可迭代
-    print(isinstance([1, 2, 3], Iterable))  # list是否可迭代
-    print(isinstance(123, Iterable))  # 整数是否可迭代啊
+    # print(datetime.datetime.today())
+    # local_time_zone = datetime.datetime.utcnow() / 3600
+    # print("local_time_zone", local_time_zone)
+    # print(datetime.datetime.utcnow())
+    # print(datetime.datetime.today())
+    pp = 0
+    print(pp is not None)
+
+
 
 
 

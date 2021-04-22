@@ -18,6 +18,7 @@ def handle_write(channel, method, properties, body):
     act_desc = data.get('act_desc')
     try:
         print("success handle data:{}".format(data))
+        # raise IOError
     except Exception as ex:
         print("handle data error, data: {} ex:{}".format(body, ex))
     else:
@@ -32,7 +33,12 @@ if __name__ == '__main__':
         'port': 5672,
     }
     print("**** start write heart record process ****")
-    client = RabbitmqBox(**rabbit_config)
-    client.connect_server()
-    queue_name = "resource_distribute"
-    client.consume_from_queue(queue_name=queue_name, callback=handle_write)
+    # client = RabbitmqBox(**rabbit_config)
+    # client.connect_server()
+    # queue_name = "resource_distribute"
+    # client.consume_from_queue(queue_name=queue_name, callback=handle_write)
+
+    with RabbitmqBox(**rabbit_config) as client:
+        client.connect_server()
+        queue_name = "resource_distribute"
+        client.consume_from_queue(queue_name=queue_name, callback=handle_write)
