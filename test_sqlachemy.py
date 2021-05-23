@@ -45,6 +45,14 @@ class OpBigR(Base):
     last_30_charge = Column(Integer, nullable=False, default=0)
 
 
+class Follow(Base):
+    __tablename__ = 'follow'
+    id = Column(Integer, primary_key=True)
+    uid = Column(String(24))
+    aid = Column(String(24))
+    ctime = Column(Integer)
+
+
 def th_ss():
     sess = Session()
     print(sess.query(Mony).filter(Mony.money >= 0).all())
@@ -52,15 +60,22 @@ def th_ss():
 
 
 if __name__ == '__main__':
+    # Base.metadata.create_all(engine)
     # filter_q = set()
     sess = Session()
-    xpr = case([(Mony.uid == 'ccc', 'ccccv')], else_='ooo').label("full_name")
-    dddc = sess.query(func.count(Mony.uid).label('dddd')).filter(Mony.money >= 0).first()
+    follow_sub = sess.query(Follow.uid, func.count(Follow.uid).label('count_uid')).group_by(Follow.uid).subquery()
+    ddd = sess.query(
+            func.sum(case(whens=((and_(follow_sub.c.count_uid >= 1, follow_sub.c.count_uid < 2), 1), ), else_=0)
+            ).label('m1'),
+            func.sum(case(whens=((and_(follow_sub.c.count_uid >= 2, follow_sub.c.count_uid < 3), 1),), else_=0)
+            ).label('m2')
+        )
+    for item in ddd:
+        print(item.m1, item.m2)
+    # xpr = case([(Mony.uid == 'ccc', 'ccccv')], else_='ooo').label("full_name")
+    # dddc = sess.query(func.count(Mony.uid).label('dddd')).filter(Mony.money >= 0).first()
     # dddc = sess.query(Mony.uid, xpr).filter(Mony.money >= 0)
-    # for item in dddc:
-    print(dddc.dddd)
-    # time.sleep(6)
-    # print(sess.query(Mony).filter(Mony.money >= 0).all())
+    # for item in dddc
 
 
 

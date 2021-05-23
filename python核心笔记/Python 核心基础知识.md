@@ -1184,6 +1184,14 @@ if __name__ == "__main__":
 
 
 
+##### 7、线程池的理解
+
+
+
+[线程池理解]: https://www.jianshu.com/p/b9b3d66aa0be
+
+
+
 #### 十二、迭代协议
 
 可迭代协议： 实现`__iter__`方法（通常`__iter__`方法的类的实例叫做可迭代对象）
@@ -1465,7 +1473,7 @@ if __name__ == "__main__":
 
 ```python
 #1. epoll并不代表一定比select好
-# 在并发高的情况下，连接活跃度不是很高， epoll比select
+# 在并发高的情况下，连接活跃度不是很高， epoll比select好
 # 并发性不高，同时连接很活跃， select比epoll好
 
 #通过非阻塞io实现http请求
@@ -1558,13 +1566,17 @@ if __name__ == "__main__":
 
 
 
-回调模式、同步编程、多线程处理IO的缺点：
+##### 3、回调模式、同步编程、多线程处理IO的缺点
 
 1.回调模式（回调+事件循环+select(poll\epoll)） 编码复杂度高
 
 2.同步编程并发性不高
 
 3.多线程编程需要线程间同步，lock
+
+
+
+![1619110094824](F:\quhong\DEMO\python核心笔记\回调之痛.png)
 
 
 
@@ -1577,3 +1589,734 @@ if __name__ == "__main__":
 ​	由于线程由操作系统调度切换的，单线程切换意味着我们需要程序员自己去调度任务
 
 ​	且不再需要锁，并发性高；如果单线程内切换函数，性能远高于线程切换，并发性更高
+
+
+
+##### 4、协程
+
+![1619110276996](F:\quhong\DEMO\python核心笔记\协程001.png)
+
+为了实现下面的方式
+
+最理想的方式：
+
+1.采用同步的方式去编写异步的代码
+
+2.使用单线程去切换任务
+
+​	由于线程由操作系统调度切换的，单线程切换意味着我们需要程序员自己去调度任务
+
+​	且不再需要锁，并发性高；如果单线程内切换函数，性能远高于线程切换，并发性更高
+
+
+
+```python
+# def get_url(url):
+#     #do someting 1
+#     html = get_html(url) #此处暂停，切换到另一个函数去执行
+#     # #parse html
+#     urls = parse_url(html)
+#
+# def get_url(url):
+#     #do someting 1
+#     html = get_html(url) #此处暂停，切换到另一个函数去执行
+#     # #parse html
+#     urls = parse_url(html)
+
+# 传统函数调用 过程 A->B->C
+# 我们需要一个可以暂停的函数，并且可以在适当的时候恢复该函数的继续执行
+# 出现了协程 -> 有多个入口的函数、 可以暂停的函数， 可以暂停的函数(可以向暂停的地方传入值)
+```
+
+
+
+###### 4.1 生成器高级特性
+
+```python
+'''
+1. 可以产出值， 2. 可以接收值(调用方传递进来的值)
+'''
+
+def gen_func():
+    #1. 可以产出值， 2. 可以接收值(调用方传递进来的值)
+    html = yield "http://projectsedu.com"
+    print(html)
+    return "bobby"
+
+
+if __name__ == "__main__":
+    gen = gen_func()
+    
+     #1.启动生成器方式有两种， next(), send
+    #在调用send发送非none值之前，我们必须启动一次生成器， 方式有两种1. gen.send(None), 2. next(gen)
+    url = gen.send(None)
+    
+    # download url
+    html = "bobby"
+    print(gen.send(html)) #send方法可以传递值进入生成器内部，同时还可以重启生成器执行到下一个yield位置
+    print(gen.send(html))
+    
+    
+ '''
+3.关闭生成器
+'''
+ def gen_func():
+    
+    try:
+        yield "http://projectsedu.com"
+    except BaseException:  # 不需要捕获该异常
+        pass
+    yield 2
+    yield 3
+    return "bobby"
+
+if __name__ == "__main__":
+    gen = gen_func()
+    print(next(gen))
+    gen.close()   # 会报  RuntimeError: generator ignored GeneratorExit
+    print(next(gen))  # 再次调用会提示生成器已关闭
+    print("bobby")
+
+    #GeneratorExit是继承自BaseException， 不是Exception
+    
+    
+'''
+4、向生成器扔异常
+'''
+def gen_func():
+  
+    try:
+        yield "http://projectsedu.com"
+    except Exception as e:
+        pass
+    yield 2
+    yield 3
+    return "bobby"
+
+if __name__ == "__main__":
+    gen = gen_func()
+    print(next(gen))
+    gen.throw(Exception, "download error")
+    print(next(gen))
+    gen.throw(Exception, "download error")
+    
+    
+    
+    
+'''
+综述，我们通过close、send以及 throw对生成器的完善已经初步达到协程的要求，基本达到所需的功能需求，即:
+1、我们可以发送值
+2、可以暂停
+3、可以向里面抛出异常
+4、可以关闭
+'''
+```
+
+
+
+###### 4.2 yeild from
+
+```python
+def g1(gen):
+    yield from gen
+
+def main():
+    g = g1()
+    g.send(None)
+
+#1. main 调用方 g1(委托生成器) gen 子生成器
+#2. yield from会在调用方与子生成器之间建立一个双向通道
+#3. 可以向子生成器发送close、send以及 throw
+
+# 实现同步的方式去编写异步的代码
+
+
+
+final_result = {}
+
+def sales_sum(pro_name):
+    total = 0
+    nums = []
+    while True:
+        x = yield
+        print(pro_name + '销量：', x)
+        if not x:
+            break
+         total += x
+        nums.append(x)
+    return total, nums
+
+def middle(key):
+    while True:
+        final_result[key] = yield from sales_sum(key)
+        print(key+"销量统计完成！！.")
+
+def main():
+    data_sets = {
+        "bobby牌面膜": [1200, 1500, 3000],
+        "bobby牌手机": [28,55,98,108 ],
+        "bobby牌大衣": [280,560,778,70],
+    }
+    for key, data_set in data_sets.items():
+        print("start key:", key)
+        m = middle(key)
+        m.send(None) # 预激middle协程
+        for value in data_set:
+            m.send(value)   # 给协程传递每一组的值
+        m.send(None)
+    print("final_result:", final_result)
+
+if __name__ == '__main__':
+    main()
+
+```
+
+```python
+#pep380
+
+#1. RESULT = yield from EXPR可以简化成下面这样
+#一些说明
+"""
+_i：子生成器，同时也是一个迭代器
+_y：子生成器生产的值
+_r：yield from 表达式最终的值
+_s：调用方通过send()发送的值
+_e：异常对象
+
+"""
+
+_i = iter(EXPR)      # EXPR是一个可迭代对象，_i其实是子生成器；
+try:
+    _y = next(_i)   # 预激子生成器，把产出的第一个值存在_y中；
+except StopIteration as _e:
+    _r = _e.value   # 如果抛出了`StopIteration`异常，那么就将异常对象的`value`属性保存到_r，这是最简单的情况的返回值；
+else:
+    while 1:    # 尝试执行这个循环，委托生成器会阻塞；
+        _s = yield _y   # 生产子生成器的值，等待调用方`send()`值，发送过来的值将保存在_s中；
+        try:
+            _y = _i.send(_s)    # 转发_s，并且尝试向下执行；
+        except StopIteration as _e:
+            _r = _e.value       # 如果子生成器抛出异常，那么就获取异常对象的`value`属性存到_r，退出循环，恢复委托生成器的运行；
+            break
+RESULT = _r     # _r就是整个yield from表达式返回的值。
+
+"""
+1. 子生成器可能只是一个迭代器，并不是一个作为协程的生成器，所以它不支持.throw()和.close()方法；
+2. 如果子生成器支持.throw()和.close()方法，但是在子生成器内部，这两个方法都会抛出异常；
+3. 调用方让子生成器自己抛出异常
+4. 当调用方使用next()或者.send(None)时，都要在子生成器上调用next()函数，当调用方使用.send()发送非 None 值时，才调用子生成器的.send()方法；
+"""
+_i = iter(EXPR)
+try:
+    _y = next(_i)
+except StopIteration as _e:
+    _r = _e.value
+else:
+    while 1:
+        try:
+            _s = yield _y
+        except GeneratorExit as _e:
+            try:
+                _m = _i.close
+            except AttributeError:
+                pass
+            else:
+                _m()
+            raise _e
+        except BaseException as _e:
+            _x = sys.exc_info()
+            try:
+                _m = _i.throw
+            except AttributeError:
+                raise _e
+            else:
+                try:
+                    _y = _m(*_x)
+                except StopIteration as _e:
+                    _r = _e.value
+                    break
+        else:
+            try:
+                if _s is None:
+                    _y = next(_i)
+                else:
+                    _y = _i.send(_s)
+            except StopIteration as _e:
+                _r = _e.value
+                break
+RESULT = _r
+
+"""
+看完代码，我们总结一下关键点：
+
+1. 子生成器生产的值，都是直接传给调用方的；调用方通过.send()发送的值都是直接传递给子生成器的；如果发送的是 None，会调用子生成器的__next__()方法，如果不是 None，会调用子生成器的.send()方法；
+2. 子生成器退出的时候，最后的return EXPR，会触发一个StopIteration(EXPR)异常；
+3. yield from表达式的值，是子生成器终止时，传递给StopIteration异常的第一个参数；
+4. 如果调用的时候出现StopIteration异常，委托生成器会恢复运行，同时其他的异常会向上 "冒泡"；
+5. 传入委托生成器的异常里，除了GeneratorExit之外，其他的所有异常全部传递给子生成器的.throw()方法；如果调用.throw()的时候出现了StopIteration异常，那么就恢复委托生成器的运行，其他的异常全部向上 "冒泡"；
+6. 如果在委托生成器上调用.close()或传入GeneratorExit异常，会调用子生成器的.close()方法，没有的话就不调用。如果在调用.close()的时候抛出了异常，那么就向上 "冒泡"，否则的话委托生成器会抛出GeneratorExit异常。
+
+"""
+
+```
+
+
+
+```python
+#python为了将语义变得更加明确，就引入了async和await关键词用于定义原生的协程
+# async def downloader(url):
+#     return "bobby"
+import types
+
+@types.coroutine
+def downloader(url):
+    yield "bobby"
+
+async def download_url(url):
+    #dosomethings
+    html = await downloader(url)
+    return html
+
+if __name__ == "__main__":
+    coro = download_url("http://www.imooc.com")
+    # next(None)
+    coro.send(None)
+
+```
+
+
+
+#### 十四、asyncio
+
+![1619115597946](F:\quhong\DEMO\python核心笔记\asynio.png)
+
+##### 1、asyncio基本使用
+
+```python
+#事件循环+回调（驱动生成器）+epoll(IO多路复用)
+#asyncio是python用于解决异步io编程的一整套解决方案
+#tornado、gevent、twisted（scrapy， django channels）
+#torando(实现web服务器)， django+flask(uwsgi, gunicorn+nginx)
+#tornado可以直接部署， nginx+tornado
+
+import asyncio
+async def main():
+    print('Hello ...')
+    await asyncio.sleep(1)
+    print('... World!')
+asyncio.run(main())
+
+
+
+
+
+#使用asyncio
+import asyncio
+import time
+async def get_html(url):
+    print("start get url")
+    await asyncio.sleep(2)
+    print("end get url")
+
+if __name__ == "__main__":
+    start_time = time.time()
+    loop = asyncio.get_event_loop()
+    tasks = [get_html("http://www.imooc.com") for i in range(10)]
+    loop.run_until_complete(asyncio.wait(tasks))   # asyncio.wait提交多个任务
+    print(time.time()-start_time)
+```
+
+
+
+##### 2、 获取协程的返回值
+
+```python
+# 获取协程的返回值
+# 及添加回调函数
+
+
+import asyncio
+import time
+from functools import partial
+async def get_html(url):
+    print("start get url")
+    await asyncio.sleep(2)
+    return "bobby"
+
+def callback(url, future):
+    print(url)
+    print("send email to bobby")
+
+if __name__ == "__main__":
+    start_time = time.time()
+    
+    # 第一种方式：
+    loop = asyncio.get_event_loop()
+    get_future = asyncio.ensure_future(get_html("http://www.imooc.com"))  # 会创建create_task
+    loop.run_until_complete(get_future)
+    print(get_future.result())
+    
+    # 第二种方式：
+    task = loop.create_task(get_html("http://www.imooc.com"))
+    task.add_done_callback(partial(callback, "http://www.imooc.com"))  # 添加回调函数及参数
+    loop.run_until_complete(task)
+    print(task.result())
+```
+
+
+
+#####  3、wait 和 gather
+
+```python
+# wait 和 gather
+# 1.gather更加high-level
+# 2.可以将task分组
+# 3.可以取消分组的task
+
+import asyncio
+import time
+async def get_html(url):
+    print("start get url")
+    await asyncio.sleep(2)
+    print("end get url")
+
+if __name__ == "__main__":
+    start_time = time.time()
+    loop = asyncio.get_event_loop()
+    tasks = [get_html("http://www.imooc.com") for i in range(10)]
+    # loop.run_until_complete(asyncio.gather(*tasks))
+    # print(time.time()-start_time)
+
+    # gather和wait的区别
+    # gather更加high-level
+    # 可以将task分组
+    group1 = [get_html("http://projectsedu.com") for i in range(2)]
+    group2 = [get_html("http://www.imooc.com") for i in range(2)]
+    group1 = asyncio.gather(*group1)
+    group2 = asyncio.gather(*group2)
+    group2.cancel()
+    loop.run_until_complete(asyncio.gather(group1, group2))
+    print(time.time() - start_time)
+```
+
+
+
+##### 4、取消task
+
+```python
+# 1. run_until_complete
+# import asyncio
+# loop = asyncio.get_event_loop()
+# loop.run_forever()
+# loop.run_until_complete()
+
+# 1. loop会被放到future中
+# 2. 取消future(task)
+
+import asyncio
+import time
+
+async def get_html(sleep_times):
+    print("waiting")
+    await asyncio.sleep(sleep_times)
+    print("done after {}s".format(sleep_times))
+
+
+if __name__ == "__main__":
+    task1 = get_html(2)
+    task2 = get_html(3)
+    task3 = get_html(3)
+
+    tasks = [task1, task2, task3]
+
+    loop = asyncio.get_event_loop()
+
+    try:
+        loop.run_until_complete(asyncio.wait(tasks))
+    except KeyboardInterrupt as e:
+        all_tasks = asyncio.Task.all_tasks()  # 获取事件循环所有的task
+        for task in all_tasks:
+            print("cancel task")
+            print(task.cancel())
+        loop.stop()
+        loop.run_forever()
+    finally:
+        loop.close()
+```
+
+
+
+##### 5、asyncio集成线程池
+
+```python
+# 使用多线程：在协程中集成阻塞io
+
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+import socket
+from urllib.parse import urlparse
+
+
+def get_url(url):
+    #通过socket请求html
+    url = urlparse(url)
+    host = url.netloc
+    path = url.path
+    if path == "":
+        path = "/"
+
+    #建立socket连接
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # client.setblocking(False)
+    client.connect((host, 80)) #阻塞不会消耗cpu
+
+    #不停的询问连接是否建立好， 需要while循环不停的去检查状态
+    #做计算任务或者再次发起其他的连接请求
+
+    client.send("GET {} HTTP/1.1\r\nHost:{}\r\nConnection:close\r\n\r\n".format(path, host).encode("utf8"))
+
+    data = b""
+    while True:
+        d = client.recv(1024)
+        if d:
+            data += d
+        else:
+            break
+
+    data = data.decode("utf8")
+    html_data = data.split("\r\n\r\n")[1]
+    print(html_data)
+    client.close()
+
+
+if __name__ == "__main__":
+    import time
+    start_time = time.time()
+    loop = asyncio.get_event_loop()
+    executor = ThreadPoolExecutor(3)
+    tasks = []
+    for url in range(20):
+        url = "http://shop.projectsedu.com/goods/{}/".format(url)
+        task = loop.run_in_executor(executor, get_url, url)
+        tasks.append(task)
+    loop.run_until_complete(asyncio.wait(tasks))
+    print("last time:{}".format(time.time()-start_time))
+
+
+
+```
+
+
+
+##### 6、asnicio与aiohttp结合实现爬虫
+
+```python
+import asyncio
+import re
+import aiohttp
+import aiomysql
+from pyquery import PyQuery
+from lxml import etree
+ 
+start_url = 'http://news.baidu.com/'
+waitting_urs = []
+seen_uels = set()
+stoppint = False
+sem = asyncio.Semaphore(10)  # 现在并发为3个
+headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko"}
+ 
+ 
+async def fetch(url, session):
+    async with sem:
+        #     await asyncio.sleep(1)
+        try:
+            async with session.get(url, headers=headers, timeout=1) as resp:
+                print('url status：{}'.format(resp.status))
+                # if resp.status in [200, 201]:
+                data = etree.HTML(await resp.read())
+                return data
+        except Exception as e:
+            print('错误为:{}  url:{}'.format(e, url))
+ 
+ 
+def extract_urls(html):
+    try:
+        for url in html.xpath('//a/@href'):
+            if url and url.startswith("http") and url not in seen_uels:
+                if re.findall(r'baidu', url):
+                    waitting_urs.append(url)
+    except:
+        pass
+ 
+ 
+async def init_urls(url, session):
+    html = await fetch(url, session)
+    seen_uels.add(url)
+    extract_urls(html)
+ 
+ 
+async def article_handler(url, session, pool):
+    # 获取文章详情
+    html = await fetch(url, session)
+    seen_uels.add(url)
+    extract_urls(html)
+    try:
+        title = html.xpath('//title/text()')[0].strip()
+        print('title:{}'.format(title))
+        async with pool.acquire() as conn:
+            async with conn.cursor() as cursor:
+                try:
+                    # 插入
+                    await cursor.execute('insert into async_test_async(title) values("{}")'.format(title))
+ 
+                    # 插入数据
+                    await cursor.execute("insert into async_test_async(title) values('{}')".format(title))
+ 
+                    # 查询数据
+                    await cursor.execute("select * from async_test_async")
+                    data = await cursor.fetchall()
+                    print("data:", data)
+ 
+                    # 更新数据
+                    await cursor.execute("update async_test_async set title='{}' where id={}".format('update', 10168))
+ 
+                    # 删除数据
+                    await cursor.execute("delete from async_test_async where id={}".format(10174))
+                except:
+                    pass
+    except:
+        pass
+ 
+ 
+async def consumer(pool):
+    async with aiohttp.ClientSession() as session:
+        while not stoppint:
+            if len(waitting_urs) < 10:
+                if url not in seen_uels:
+                    asyncio.ensure_future(init_urls(url, session))
+ 
+            url = waitting_urs.pop()
+            print('start get url:{}'.format(url))
+            if re.findall(r'baidu', url):
+                if url not in seen_uels:
+                    print('waitting_urs:{}'.format(waitting_urs[0: 3]))
+                    asyncio.ensure_future(article_handler(url, session, pool))
+                    await asyncio.sleep(0.1)
+ 
+ 
+async def main(loop):
+    pool = await aiomysql.create_pool(host='127.0.0.1', port=3306, user='root', password='root', db='cfda', loop=loop,
+                                      charset='utf8', autocommit=True)
+    async with aiohttp.ClientSession() as session:
+        html = await fetch(start_url, session)
+        seen_uels.add(start_url)
+        extract_urls(html)
+ 
+    asyncio.ensure_future(consumer(pool))
+ 
+ 
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main(loop))
+    loop.run_forever()　
+```
+
+
+
+```python
+import asyncio
+import re
+import aiohttp
+import aiomysql
+from pyquery import PyQuery
+from lxml import etree
+ 
+start_url = 'http://news.baidu.com/'
+waitting_urs = []
+seen_uels = set()
+stoppint = False
+sem = asyncio.Semaphore(10)  # 现在并发为3个
+headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko"}
+ 
+ 
+class async_text(object):
+ 
+    async def fetch(self, url, session):
+        print("self:", self)
+        async with sem:
+            #     await asyncio.sleep(1)
+            try:
+                async with session.get(url, headers=headers, timeout=1) as resp:
+                    print('url status：{}'.format(resp.status))
+                    # if resp.status in [200, 201]:
+                    data = etree.HTML(await resp.read())
+                    return data
+            except Exception as e:
+                print('错误为:{}  url:{}'.format(e, url))
+ 
+    def extract_urls(self, html):
+        try:
+            for url in html.xpath('//a/@href'):
+                if url and url.startswith("http") and url not in seen_uels:
+                    if re.findall(r'baidu', url):
+                        waitting_urs.append(url)
+        except:
+            pass
+ 
+    async def init_urls(self, url, session):
+        html = await self.fetch(self, url, session)
+        seen_uels.add(url)
+        self.extract_urls(self, html)
+ 
+    async def article_handler(self, url, session, pool):
+        # 获取文章详情
+        html = await self.fetch(self, url, session)
+        seen_uels.add(url)
+        self.extract_urls(self, html)
+        try:
+            title = html.xpath('//title/text()')[0].strip()
+            print('title:{}'.format(title))
+            async with pool.acquire() as conn:
+                async with conn.cursor() as cur:
+                    try:
+                        # 插入
+                        await cur.execute('insert into async_test_async(title) values("{}")'.format(title))
+                    except:
+                        pass
+        except:
+            pass
+ 
+    async def consumer(self, pool):
+        async with aiohttp.ClientSession() as session:
+            while not stoppint:
+                if len(waitting_urs) < 10:
+                    if url not in seen_uels:
+                        asyncio.ensure_future(self.init_urls(self, url, session))
+ 
+                url = waitting_urs.pop()
+                print('start get url:{}'.format(url))
+                if re.findall(r'baidu', url):
+                    if url not in seen_uels:
+                        print('waitting_urs:{}'.format(waitting_urs[0: 3]))
+                        asyncio.ensure_future(self.article_handler(self, url, session, pool))
+                        await asyncio.sleep(0.1)
+ 
+    @classmethod
+    async def main(self, loop):
+        pool = await aiomysql.create_pool(host='127.0.0.1', port=3306, user='root', password='root', db='cfda',
+                                          loop=loop,
+                                          charset='utf8', autocommit=True)
+        async with aiohttp.ClientSession() as session:
+            html = await self.fetch(self, start_url, session)
+            seen_uels.add(start_url)
+            self.extract_urls(self, html)
+ 
+        asyncio.ensure_future(self.consumer(self, pool))
+ 
+ 
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(async_text.main(loop))
+    loop.run_forever()
+```
+

@@ -64,25 +64,108 @@ def get_register_str(actor_id):
         register_day_str = 0
 
 
-class Sample:
-    def __enter__(self):
-        # 获取资源
-        print("enter")
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        #释放资源
-        print("exit")
-
-    def do_something(self):
-        print ("doing something")
+def gen_func():
+    try:
+        yield "http://projectsedu.com"
+    except BaseException:
+        pass
+    yield 2
+    yield 3
+    return "bobby"
 
 
+def init_prize_pool(atype, statictime):
+    """
+    # A  == > Family
+    # B  == > Health
+    # C  == > Love
+    # D  == > Happiness
+    # E  == > Peace
+    :param atype: 1：免费抽  2：付费抽
+    :return:
+    """
+    temp_str = ''
 
+    # 指定默认数据
+    if atype == 1:
+        prize_key = 'celebrate_daily_key'
+        prize_pool_dict = {
+            'A': 50,
+            'B': 30,
+            'D': 10,
+            'C': 9,
+            'E': 1,
+        }
+    else:
+        prize_key = 'celebrate_pay_key'
+        prize_pool_dict = {
+            'A': 50,
+            'B': 30,
+            'D': 10,
+            'C': 9,
+            'E': 1,
+        }
+
+
+
+    if atype == 1 and statictime >= 20210503 and statictime <= 20210505:
+        prize_key = 'celebrate_daily_key'
+        prize_pool_dict = {
+            'A': 50,
+            'B': 30,
+            'D': 10,
+            'C': 9,
+            'E': 1,
+        }
+
+    elif atype == 1 and statictime >= 20210506 and statictime <= 20210509:
+        prize_key = 'celebrate_daily_key'
+        prize_pool_dict = {
+            'A': 50,
+            'B': 20,
+            'D': 15,
+            'C': 10,
+            'E': 5,
+        }
+
+    elif atype == 1 and statictime > 20210509:
+        prize_key = 'celebrate_daily_key'
+        prize_pool_dict = {
+            'A': 50,
+            'B': 20,
+            'D': 10,
+            'C': 10,
+            'E': 10,
+        }
+
+    # 付费
+    elif atype == 2 and statictime >= 20210503 and statictime <= 20210505:
+        prize_key = 'celebrate_pay_key'
+        prize_pool_dict = {
+            'A': 30,
+            'B': 20,
+            'D': 20,
+            'C': 20,
+            'E': 10,
+        }
+
+    elif atype == 2 and statictime >= 20210506:
+        prize_key = 'celebrate_pay_key'
+        prize_pool_dict = {
+            'A': 20,
+            'B': 20,
+            'D': 20,
+            'C': 20,
+            'E': 20
+        }
+
+    print(prize_pool_dict)
+    print(prize_key)
 
 
 
 if __name__ == '__main__':
+    # init_prize_pool(atype=1, statictime=20210509)
     # print(decode_base64('MfpnQcJusUUp/9X9h1fqUhHcPx5RHeZE+qUBwbMUDsMvwAwhjBz5ACAq4ujFFTpIunypK5OPfm8='))
     # url = 'https://cdn3.qmovies.tv/youstar/quran_recitation__competition.png'
     # print(get_short_link_bitly(url))
@@ -94,5 +177,8 @@ if __name__ == '__main__':
     # print(suid)
     # get_register_str(ObjectId('600c39a532a61091e2d5fc07'))
     # print(30 * 12 * 60 * 60)
-    with Sample() as sample:
-        sample.do_something()
+    for i in range(10):
+        if i == 3:
+            print(i)
+        print(1)
+

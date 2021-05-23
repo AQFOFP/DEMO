@@ -32,8 +32,8 @@ def mongoorm():
     # Book(head='3333', title='rrteee', icon=['678', '5644', '5w54242'],  book_banner=[]).save()
     # reg = {'book_banner': {'$regex': '^(http://www.qq.com)'}}
     flag = 1
-    filter_m = dict({'head': 1})
-    print(filter_m)
+    filter_m = dict()
+    # print(filter_m)
     # if flag == 1:
     #     filter_m.update({'head': {'$in': ['http://www.baidu.com']}})
     # elif flag == 2:
@@ -41,7 +41,10 @@ def mongoorm():
     # else:
     #     pass
 
-    # books = Book.objects(__raw__=filter_m)
+    books = Book.objects().first()
+    filter_m = books.to_mongo()
+    filter_m['head'] = 111
+    print(filter_m['head'])
     # for item in books:
     #     print(item.head)
     # dd = set()
@@ -60,24 +63,34 @@ def mongoorm():
     #     b.save()
 
 
+def get_current_day_begin_timestamp():
+    time_string = datetime.datetime.fromtimestamp(
+        time.time()).strftime('%Y-%m-%d 00:00')
+    timestamp = time.mktime(datetime.datetime.strptime(
+        time_string, "%Y-%m-%d 00:00").timetuple())
+    return float(timestamp) - 8 * 60 * 60
+
+
 if __name__ == '__main__':
     # savexl()
     # mongoorm()
-    # dd = '2018-1-7'
-    # doj = datetime.datetime.strptime(dd, '%Y-%m-%d')
-    # date_key = int((datetime.datetime.utcnow() + datetime.timedelta(hours=3)).strftime("%Y%m%d"))
-    # print(datetime.datetime.utcnow() + datetime.timedelta(hours=3))
-
-    # print(datetime.datetime.today())
-    # local_time_zone = datetime.datetime.utcnow() / 3600
-    # print("local_time_zone", local_time_zone)
-    # print(datetime.datetime.utcnow())
-    # print(datetime.datetime.today())
-    pp = 0
-    print(pp is not None)
 
 
+    # ddd =
+    # print(ddd.timestamp())
+
+    # today = datetime.datetime.utcnow() + datetime.timedelta(hours=3)
+    # time_string = today.strftime('%Y-%m-%d 00:00')
+    # print(today.timetuple())
+    # print(time.mktime(datetime.datetime.strptime(time_string, "%Y-%m-%d 00:00").timetuple()) + 5*60*60)
 
 
+    now_stamp = int(time.time())
+    now = now_stamp - 9000  # 印度时间转换为沙特时间统计  gmt +5.5 --> gmt +3
+    timeArray = time.localtime(now)
 
-
+    static_time = time.strftime('%Y-%m-%d', timeArray)
+    s_stamp = int(datetime.datetime.strptime(static_time, '%Y-%m-%d').timestamp()) + 9000
+    e_stamp = s_stamp + 24*60*60
+    print(static_time)
+    print(s_stamp, e_stamp)

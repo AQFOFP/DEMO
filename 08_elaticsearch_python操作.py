@@ -108,34 +108,68 @@ def create_es_data():
 
 if __name__ == '__main__':
     # create_es_data()
-    body_search = {"from": 0, "size": 10000,
-                   "query": {
-                       "bool": {"filter": [{"range": {"mtime": {"gte": 1587933011, "lte": 1587933055}}},
-                                           {"terms": {"atype": ["1"]}},
-                                           ]}},
-                   # "sort": [{"mtime": {"order": "DESC"}}],
-                   }
-
-    # result_es = es_bak.search(index="money_detail2_es", doc_type="politics", body=body_search, ignore=404)
+    channel_list = ['abc3']
+    # body_search = {"from": 0, "size": 10,
+    #                 "query": {
+    #                     "bool": {
+    #                         "must": [
+    #                             # {"term": {"title": "googlePayCharge"}},
+    #                             {"range": {"mtime": {"gte": 1587933011, "lte": 1587933055}}},
+    #                             # {"terms": {"uid": channel_list}},
     #
-    # ret = result_es['hits']['hits']
+    #                             {"bool": {
+    #                                 "should": [
+    #                                     {"match_phrase": {"title": 'googlePayCharge'}},
+    #                                     {"match_phrase": {"title": 'ApplePayCharge'}},
+    #                                 ]
+    #                             }
+    #                             }
+    #                         ],
+    #
+    #                     }
+    #                 },
+    #                "aggs": {
+    #                    'record_count': {
+    #                        "terms": {
+    #                            "field": "uid.keyword",
+    #                            "size": 10000,
+    #                            "shard_size": 10000
+    #                        },
+    #                    }
+    #                },
+    #             }
+
+    body_search = {"from": 0, "size": 0,
+                   "query": {
+                        "match_all": {}
+                    },
+                   "aggs": {
+                       'record_count': {
+                           "terms":
+                               {
+                                   "field": "atype",
+                                   "size": 10000,
+                                   "shard_size": 10000
+                                },
+                           "aggs":{
+                               'title_count': {
+                                   "terms":
+                                       {
+                                           "field": "title.keyword",
+                                       },
+                               }
+                           }
+                       },
+                   },
+                }
 
     result_es = es.search(index="youstar", doc_type="diamond", body=body_search, ignore=404)
     online_res = result_es['hits']['hits']
-    # online_res = result_es['aggregations']['record_count_ll']['value']
-    # online_res = result_es['aggregations']['record_count_ll']['buckets']
-    # print(online_res)
+    print(result_es)
+    # print(len(result_es['aggregations']['record_count']['buckets']))
     for item in online_res:
         print(item)
-
-    ddd = es.get(index='youstar', doc_type='diamond', id='AXXxNvDsAGasMFxiSQum')
-
-    print(ddd)
-    # es.update(index='youstar', doc_type='diamond', id='AXXxNvDsAGasMFxiSQum', body={'doc': {'desc': 'gggg'}})
-
-    # ddd = es.get(index='youstar', doc_type='diamond', id='AXXxNvDsAGasMFxiSQum')
-    #
-    # print(ddd)
+        # pass
 
 
     # https://blog.csdn.net/xuezhangjun0121/article/details/80745575

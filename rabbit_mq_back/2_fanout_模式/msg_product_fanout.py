@@ -22,6 +22,6 @@ if __name__ == '__main__':
             'source_id': '123' + str(item),
         }
 
-        client.publish_to_queue(msg=json.dumps(data))
+    client.publish_to_queue(msg=json.dumps({'dd': 44}))
 
     client.connection.close()
